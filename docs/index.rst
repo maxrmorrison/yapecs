@@ -1,0 +1,4 @@
+yapem
+=======
+
+.. automodule:: yapem
