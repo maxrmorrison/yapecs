@@ -127,8 +127,8 @@ Considerations
 
 
 ``yapem``'s flexibility is made possible by importing the configuration file.
-This means the contents of the configuration file are executed. Please only
-use configuration files you trust.
+This means the contents of the configuration file are executed. Only use
+configuration files you trust.
 
 
 Submodules

@@ -13,14 +13,12 @@ from typing import Optional
 def configure(defaults: ModuleType, config: Optional[Path] = None):
     """Update the default configuration values
 
-    The configuration values are updated by loading the Python file specified
-    by the --config flag. Default configuration values are overwritten by
-    values of the same name defined in the configuration file specified by
-    --config.
-
     Args:
         defaults: The submodule containing default configuration values
-        config: The Python file containing the updated configuration values
+        config: The Python file containing the updated configuration values.
+            If not provided and the ``--config`` parameter is a command-line
+            argument, the corresponding argument is used as the configuration
+            file.
     """
     # Get config file
     if config is None:
