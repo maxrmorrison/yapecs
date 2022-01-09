@@ -73,15 +73,15 @@ top of ``<module>/__init__.py`` ::
 
 
     # Default configuration parameters to be modified
-    from . import defaults
+    from .config import defaults
 
     # Modify configuration
     import yapecs
     yapecs.configure(defaults)
 
     # Import configuration parameters
-    from .defaults import *
-    from .static import *
+    from .config.defaults import *
+    from .config.static import *
 
 
     ###############################################################################
@@ -94,10 +94,10 @@ top of ``<module>/__init__.py`` ::
 
 
 This assumes that default configuration values are saved in
-``<module>/defaults.py``. You can also define configuration values that depend
-on other configuration values. In the above script, these are assumed to be
-defined in ``<module>/static.py``. For example, in the previous example of
-temperature prediction, we may want to keep track of the total number of
+``<module>/config/defaults.py``. You can also define configuration values that
+depend on other configuration values. In the above script, these are assumed to
+be defined in ``<module>/config/static.py``. For example, in the previous example
+of temperature prediction, we may want to keep track of the total number of
 features being provided to the learning model. ::
 
     import <module>
@@ -126,9 +126,8 @@ Considerations
 ==============
 
 
-``yapecs``'s flexibility is made possible by importing the configuration file.
-This means the contents of the configuration file are executed. Only use
-configuration files you trust.
+``yapecs`` imports the configuration file. This means the contents of the
+configuration file are executed. Only use configuration files you trust.
 
 
 Submodules
