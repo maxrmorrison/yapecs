@@ -1,5 +1,5 @@
-# yapem
-Yet Another Python Experiment Manager (YAPEM)
+# yapecs
+Yet Another Python Experiment Configuration System (YAPECS)
 
 **TODO - add documentation link
 

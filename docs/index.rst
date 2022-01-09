@@ -1,4 +1,4 @@
-yapem
+yapecs
 =======
 
-.. automodule:: yapem
+.. automodule:: yapecs

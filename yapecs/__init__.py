@@ -1,9 +1,9 @@
-"""Yet Another Python Experiment Manager (YAPEM)
+"""Yet Another Python Experiment Configuration System (YAPECS)
 
-``yapem`` is a Python library for experiment configuration. It is an
+``yapecs`` is a Python library for experiment configuration. It is an
 alternative to performing experiment configuration using JSON, YAML, or more
 specialized solutions such as hydra. Relative to other configuration systems,
-I prefer ``yapem`` for the following reasons:
+I prefer ``yapecs`` for the following reasons:
 
 * Configuration files are written in Python. You do not need to learn new
   syntax, and your configurations can be as expressive as desired. Unlike JSON,
@@ -12,7 +12,7 @@ I prefer ``yapem`` for the following reasons:
 * Integration is simple, requiring only four or five lines of code (including
   imports).
 
-* The entire yapem codebase is less than 25 lines (excluding comments).
+* The entire yapecs codebase is less than 25 lines (excluding comments).
 
 
 Installation
@@ -20,7 +20,7 @@ Installation
 
 ::
 
-    pip install yapem
+    pip install yapecs
 
 
 Configuration files
@@ -55,7 +55,7 @@ just the changed parameters. ::
 
     TODAYS_TEMP_FEATURE = False
 
-Using ``yapem``, we pass our new file using the ``--config`` parameter ::
+Using ``yapecs``, we pass our new file using the ``--config`` parameter ::
 
     python -m <module>.<entrypoint> <args> --config config.py
 
@@ -64,7 +64,7 @@ Usage
 =====
 
 
-``yapem`` can be integrated into an entire module by adding the following to the
+``yapecs`` can be integrated into an entire module by adding the following to the
 top of ``<module>/__init__.py`` ::
 
     ###############################################################################
@@ -76,8 +76,8 @@ top of ``<module>/__init__.py`` ::
     from . import defaults
 
     # Modify configuration
-    import yapem
-    yapem.configure(defaults)
+    import yapecs
+    yapecs.configure(defaults)
 
     # Import configuration parameters
     from .defaults import *
@@ -108,15 +108,15 @@ features being provided to the learning model. ::
         int(<module>.AVERAGE_TEMP_FEATURE))
 
 
-You can also use ``yapem`` within a Jupyter Notebook by passing the
+You can also use ``yapecs`` within a Jupyter Notebook by passing the
 configuration file as a second argument. ::
 
     # Default configuration parameters to be modified
     import <module>.defaults
 
     # Modify configuration
-    import yapem
-    yapem.configure(<module>.defaults, 'config.py')
+    import yapecs
+    yapecs.configure(<module>.defaults, 'config.py')
 
     # Import configuration parameters
     import <module>
@@ -126,7 +126,7 @@ Considerations
 ==============
 
 
-``yapem``'s flexibility is made possible by importing the configuration file.
+``yapecs``'s flexibility is made possible by importing the configuration file.
 This means the contents of the configuration file are executed. Only use
 configuration files you trust.
 
