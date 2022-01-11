@@ -37,8 +37,13 @@ Say we are creating a system that predicts tomorrow's temperature given two feat
 Our default configuration file (e.g., ``defaults.py``) might look like the
 following ::
 
+    from pathlib import Path
+
     # Number of items in a batch
     BATCH_SIZE = 64
+
+    # Path to this default configuration file
+    DEFAULT_CONFIGURATION = Path(__file__)
 
     # Optimizer learning rate
     LEARNING_RATE = 1e-4
@@ -109,18 +114,40 @@ features being provided to the learning model. ::
         int(<module>.AVERAGE_TEMP_FEATURE))
 
 
-You can also use ``yapecs`` within a Jupyter Notebook by passing the
+You can use ``yapecs`` within, e.g.,  a Jupyter Notebook by passing the
 configuration file as a second argument. ::
 
-    # Default configuration parameters to be modified
-    import <module>.config.defaults
+    import importlib
+
+    import yapecs
+
+    import <module>
 
     # Modify configuration
-    import yapecs
     yapecs.configure(<module>.config.defaults, 'config.py')
 
-    # Import configuration parameters
+    # Reload module to propogate changes
+    importlib.reload(<module>)
+
+
+You can also swap between configurations via ``yapecs.context``. ::
+
+    import yapecs
+
     import <module>
+
+    # Change configuration
+    with yapecs.context(
+        <module>,
+        <module>.config.defaults,
+        <module>.DEFAULT_CONFIGURATION,
+        'config.py'):
+
+        # Run code using new configuration
+        assert not <module>.TODAYS_TEMP_FEATURE
+
+    # Previous configuration is restored
+    assert <module>.TODAYS_TEMP_FEATURE
 
 
 Running tests
