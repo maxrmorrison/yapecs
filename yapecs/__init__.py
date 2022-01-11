@@ -1,8 +1,8 @@
 """Yet Another Python Experiment Configuration System (YAPECS)
 
 ``yapecs`` is a Python library for experiment configuration. It is an
-alternative to performing experiment configuration using JSON, YAML, or more
-specialized solutions such as hydra. Relative to other configuration systems,
+alternative to performing experiment configuration using JSON or YAML files,
+or more complex solutions such as hydra. Relative to other configuration systems,
 I prefer ``yapecs`` for the following reasons:
 
 * Configuration files are written in Python. You do not need to learn new
@@ -14,6 +14,10 @@ I prefer ``yapecs`` for the following reasons:
 
 * The entire yapecs library is two functions and less than 40 lines (excluding
   comments).
+
+* Configuration parameters are bound to the user's module. This reduces code
+  bloat by eliminating the need to pass a configuration dictionary or many
+  individual configuration values through functions.
 
 
 Installation
@@ -150,7 +154,7 @@ You can also swap between configurations via ``yapecs.context``. ::
 
 
 Running tests
-=====
+=============
 
 ::
 
