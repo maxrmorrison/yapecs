@@ -6,13 +6,13 @@ specialized solutions such as hydra. Relative to other configuration systems,
 I prefer ``yapecs`` for the following reasons:
 
 * Configuration files are written in Python. You do not need to learn new
-  syntax, and your configurations can be as expressive as desired. Unlike JSON,
-  comments are supported within configuration files.
+  syntax, and your configurations can be as expressive as desired, using, e.g.,
+  classes, functions, or built-in types.
 
 * Integration is simple, requiring only four or five lines of code (including
   imports).
 
-* The entire yapecs library is only one function and 25 lines (excluding
+* The entire yapecs library is two functions and less than 40 lines (excluding
   comments).
 
 
@@ -68,7 +68,6 @@ Using ``yapecs``, we pass our new file using the ``--config`` parameter ::
 
 Usage
 =====
-
 
 ``yapecs`` can be integrated into an entire module by adding the following to the
 top of ``<module>/__init__.py`` ::
