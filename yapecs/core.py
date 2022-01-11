@@ -12,11 +12,11 @@ from typing import Optional
 ###############################################################################
 
 
-def configure(defaults: ModuleType, config: Optional[Path] = None):
-    """Update the default configuration values
+def configure(config_module: ModuleType, config: Optional[Path] = None):
+    """Update the configuration values
 
     Args:
-        defaults: The submodule containing default configuration values
+        config_module: The submodule containing configuration values
         config: The Python file containing the updated configuration values.
             If not provided and the ``--config`` parameter is a command-line
             argument, the corresponding argument is used as the configuration
@@ -35,13 +35,13 @@ def configure(defaults: ModuleType, config: Optional[Path] = None):
 
     # Load config file as a module
     config_spec = importlib.util.spec_from_file_location('config', config)
-    config_module = importlib.util.module_from_spec(config_spec)
-    config_spec.loader.exec_module(config_module)
+    updated_module = importlib.util.module_from_spec(config_spec)
+    config_spec.loader.exec_module(updated_module)
 
     # Merge config module and default config module
-    for parameter in dir(config_module):
-        if hasattr(defaults, parameter):
-            setattr(defaults, parameter, getattr(config_module, parameter))
+    for parameter in dir(updated_module):
+        if hasattr(config_module, parameter):
+            setattr(config_module, parameter, getattr(updated_module, parameter))
 
 
 @contextlib.contextmanager

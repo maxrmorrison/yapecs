@@ -2,22 +2,19 @@
 
 ``yapecs`` is a Python library for experiment configuration. It is an
 alternative to performing experiment configuration using JSON or YAML files,
-or more complex solutions such as hydra. Relative to other configuration systems,
+or more complex solutions such as `hydra <https://hydra.cc/docs/intro/>`_. Relative to other configuration systems,
 I prefer ``yapecs`` for the following reasons:
 
 * Configuration files are written in Python. You do not need to learn new
   syntax, and your configurations can be as expressive as desired, using, e.g.,
   classes, functions, or built-in types.
 
-* Integration is simple, requiring only four or five lines of code (including
-  imports).
-
-* The entire yapecs library is two functions and less than 40 lines (excluding
-  comments).
-
 * Configuration parameters are bound to the user's module. This reduces code
   bloat by eliminating the need to pass a configuration dictionary or many
-  individual configuration values through functions.
+  individual values through functions.
+
+* Integration is simple, requiring only four or five lines of code (including
+  imports).
 
 
 Installation
