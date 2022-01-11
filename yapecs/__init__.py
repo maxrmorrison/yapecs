@@ -12,7 +12,8 @@ I prefer ``yapecs`` for the following reasons:
 * Integration is simple, requiring only four or five lines of code (including
   imports).
 
-* The entire yapecs codebase is less than 25 lines (excluding comments).
+* The entire yapecs library is only one function and 25 lines (excluding
+  comments).
 
 
 Installation
@@ -112,14 +113,23 @@ You can also use ``yapecs`` within a Jupyter Notebook by passing the
 configuration file as a second argument. ::
 
     # Default configuration parameters to be modified
-    import <module>.defaults
+    import <module>.config.defaults
 
     # Modify configuration
     import yapecs
-    yapecs.configure(<module>.defaults, 'config.py')
+    yapecs.configure(<module>.config.defaults, 'config.py')
 
     # Import configuration parameters
     import <module>
+
+
+Running tests
+=====
+
+::
+
+    pip install pytest
+    pytest
 
 
 Considerations
