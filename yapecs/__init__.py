@@ -1,9 +1,9 @@
 """Yet Another Python Experiment Configuration System (YAPECS)
 
 ``yapecs`` is a Python library for experiment configuration. It is an
-alternative to performing experiment configuration using JSON or YAML files,
-or more complex solutions such as `hydra <https://hydra.cc/docs/intro/>`_. Relative to other configuration systems,
-I prefer ``yapecs`` for the following reasons:
+alternative to using JSON or YAML files, or more complex solutions such as
+`hydra <https://hydra.cc/docs/intro/>`_. Relative to other configuration
+systems, I prefer ``yapecs`` for the following reasons:
 
 * Configuration files are written in Python. You do not need to learn new
   syntax, and your configurations can be as expressive as desired, using, e.g.,
@@ -29,14 +29,10 @@ Configuration files
 ===================
 
 
-Say we are creating a system that predicts tomorrow's temperature given two features
-
-1. Today's temperature
-
-2. The average temperature of previous years
-
-Our default configuration file (e.g., ``defaults.py``) might look like the
-following ::
+Say we are creating a ``weather`` module to predict tomorrow's temperature
+given two features: 1) today's temperature and 2) the average temperature
+during previous years. Our default configuration file
+(e.g., ``weather/config/defaults.py``) might look like the following ::
 
     from pathlib import Path
 
@@ -62,9 +58,11 @@ just the changed parameters. ::
 
     TODAYS_TEMP_FEATURE = False
 
-Using ``yapecs``, we pass our new file using the ``--config`` parameter ::
+Using ``yapecs``, we pass our new file using the ``--config`` parameter. For
+example, if our ``weather`` module has a training entrypoint, we can use the
+following ::
 
-    python -m <module>.<entrypoint> <args> --config config.py
+    python -m weather.train <args> --config config.py
 
 
 Usage
@@ -106,12 +104,12 @@ be defined in ``<module>/config/static.py``. For example, in the previous exampl
 of temperature prediction, we may want to keep track of the total number of
 features being provided to the learning model. ::
 
-    import <module>
+    import weather
 
     # Total number of features
     NUM_FEATURES = (
-        int(<module>.TODAYS_TEMP_FEATURE) +
-        int(<module>.AVERAGE_TEMP_FEATURE))
+        int(weather.TODAYS_TEMP_FEATURE) +
+        int(weather.AVERAGE_TEMP_FEATURE))
 
 
 You can use ``yapecs`` within, e.g.,  a Jupyter Notebook by passing the
@@ -121,33 +119,33 @@ configuration file as a second argument. ::
 
     import yapecs
 
-    import <module>
+    import weather
 
     # Modify configuration
-    yapecs.configure(<module>.config.defaults, 'config.py')
+    yapecs.configure(weather.config.defaults, 'config.py')
 
     # Reload module to propogate changes
-    importlib.reload(<module>)
+    importlib.reload(weather)
 
 
 You can also swap between configurations via ``yapecs.context``. ::
 
     import yapecs
 
-    import <module>
+    import weather
 
     # Change configuration
     with yapecs.context(
-        <module>,
-        <module>.config.defaults,
-        <module>.DEFAULT_CONFIGURATION,
+        weather,
+        weather.config.defaults,
+        weather.DEFAULT_CONFIGURATION,
         'config.py'):
 
         # Run code using new configuration
-        assert not <module>.TODAYS_TEMP_FEATURE
+        assert not weather.TODAYS_TEMP_FEATURE
 
     # Previous configuration is restored
-    assert <module>.TODAYS_TEMP_FEATURE
+    assert weather.TODAYS_TEMP_FEATURE
 
 
 Running tests
