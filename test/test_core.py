@@ -1,5 +1,4 @@
 import importlib
-import sys
 from pathlib import Path
 
 import yapecs
@@ -10,31 +9,12 @@ import yapecs
 ###############################################################################
 
 
-def test_context():
-    """Test yapecs context manager"""
-    # Import module
-    import weather
-    importlib.reload(weather)
-
-    # Check that value is as expected
-    assert weather.TODAYS_TEMP_FEATURE
-
-    # Modify configuration
-    with yapecs.context(
-        weather,
-        weather.config.defaults,
-        weather.DEFAULT_CONFIGURATION,
-        Path(__file__).parent / 'config' / 'config.py'):
-
-        # Check that value was updated
-        assert not weather.TODAYS_TEMP_FEATURE
-
-    # Check that the value was restored
-    assert weather.TODAYS_TEMP_FEATURE
-
-
 def test_configuration():
     """Test yapecs configuration"""
+    # NOTE - This is just for testing purposes and is not a valid way to
+    #        swap configuration files. Specifically, this will not properly
+    #        reload dependent static variables.
+
     # Import module
     import weather
 
