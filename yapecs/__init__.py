@@ -2,8 +2,7 @@
 
 ``yapecs`` is a Python library for experiment configuration. It is an
 alternative to using JSON or YAML files, or more complex solutions such as
-`hydra <https://hydra.cc/docs/intro/>`_. Relative to other configuration
-systems, I prefer ``yapecs`` for the following reasons:
+`hydra <https://hydra.cc/docs/intro/>`_. With ``yapecs``,
 
 * Configuration files are written in Python. You do not need to learn new
   syntax, and your configurations can be as expressive as desired, using, e.g.,
@@ -36,14 +35,31 @@ during previous years. Our default configuration file
 
     from pathlib import Path
 
-    # Number of items in a batch
-    BATCH_SIZE = 64
+
+    ###############################################################################
+    # Metadata
+    ###############################################################################
+
 
     # Path to this default configuration file
     DEFAULT_CONFIGURATION = Path(__file__)
 
+
+    ###############################################################################
+    # Training
+    ###############################################################################
+
+    # Number of items in a batch
+    BATCH_SIZE = 64
+
     # Optimizer learning rate
     LEARNING_RATE = 1e-4
+
+
+    ###############################################################################
+    # Features
+    ###############################################################################
+
 
     # Whether to use today's temperature as a feature
     TODAYS_TEMP_FEATURE = True
@@ -59,8 +75,8 @@ just the changed parameters. ::
     TODAYS_TEMP_FEATURE = False
 
 Using ``yapecs``, we pass our new file using the ``--config`` parameter. For
-example, if our ``weather`` module has a training entrypoint, we can use the
-following ::
+example, if our ``weather`` module has a training entrypoint ``train``, we can
+use the following ::
 
     python -m weather.train <args> --config config.py
 
@@ -116,9 +132,7 @@ You can use ``yapecs`` within, e.g.,  a Jupyter Notebook by passing the
 configuration file as a second argument. ::
 
     import importlib
-
     import yapecs
-
     import weather
 
     # Modify configuration
@@ -131,7 +145,6 @@ configuration file as a second argument. ::
 You can also swap between configurations via ``yapecs.context``. ::
 
     import yapecs
-
     import weather
 
     # Change configuration
