@@ -141,10 +141,8 @@ Considerations
 ==============
 
 
-* ``yapecs`` imports the configuration file. This means the contents of the
-configuration file are executed. Only use configuration files you trust.
 * ``yapecs`` cannot swap between configuration files, as this would require the
-module to be reloaded. This prevents usage in, e.g., a Jupyter Notebook.
+  module to be reloaded. This prevents usage in, e.g., a Jupyter Notebook.
 
 
 Submodules
