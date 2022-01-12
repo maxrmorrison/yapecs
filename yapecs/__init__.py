@@ -33,33 +33,11 @@ given two features: 1) today's temperature and 2) the average temperature
 during previous years. Our default configuration file
 (e.g., ``weather/config/defaults.py``) might look like the following ::
 
-    from pathlib import Path
-
-
-    ###############################################################################
-    # Metadata
-    ###############################################################################
-
-
-    # Path to this default configuration file
-    DEFAULT_CONFIGURATION = Path(__file__)
-
-
-    ###############################################################################
-    # Training
-    ###############################################################################
-
     # Number of items in a batch
     BATCH_SIZE = 64
 
     # Optimizer learning rate
     LEARNING_RATE = 1e-4
-
-
-    ###############################################################################
-    # Features
-    ###############################################################################
-
 
     # Whether to use today's temperature as a feature
     TODAYS_TEMP_FEATURE = True
