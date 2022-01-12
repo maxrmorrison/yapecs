@@ -128,39 +128,6 @@ features being provided to the learning model. ::
         int(weather.AVERAGE_TEMP_FEATURE))
 
 
-You can use ``yapecs`` within, e.g.,  a Jupyter Notebook by passing the
-configuration file as a second argument. ::
-
-    import importlib
-    import yapecs
-    import weather
-
-    # Modify configuration
-    yapecs.configure(weather.config.defaults, 'config.py')
-
-    # Reload module to propogate changes
-    importlib.reload(weather)
-
-
-You can also swap between configurations via ``yapecs.context``. ::
-
-    import yapecs
-    import weather
-
-    # Change configuration
-    with yapecs.context(
-        weather,
-        weather.config.defaults,
-        weather.DEFAULT_CONFIGURATION,
-        'config.py'):
-
-        # Run code using new configuration
-        assert not weather.TODAYS_TEMP_FEATURE
-
-    # Previous configuration is restored
-    assert weather.TODAYS_TEMP_FEATURE
-
-
 Running tests
 =============
 
@@ -174,8 +141,10 @@ Considerations
 ==============
 
 
-``yapecs`` imports the configuration file. This means the contents of the
+* ``yapecs`` imports the configuration file. This means the contents of the
 configuration file are executed. Only use configuration files you trust.
+* ``yapecs`` cannot swap between configuration files, as this would require the
+module to be reloaded. This prevents usage in, e.g., a Jupyter Notebook.
 
 
 Submodules
