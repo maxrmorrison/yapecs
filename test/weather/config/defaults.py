@@ -1,6 +1,3 @@
-from pathlib import Path
-
-
 ###############################################################################
 # Configuration
 ###############################################################################
@@ -8,9 +5,6 @@ from pathlib import Path
 
 # Number of items in a batch
 BATCH_SIZE = 64
-
-# Default configuration file
-DEFAULT_CONFIGURATION = Path(__file__)
 
 # Optimizer learning rate
 LEARNING_RATE = 1e-4
