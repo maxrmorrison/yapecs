@@ -353,37 +353,6 @@ features being provided to the learning model.</p>
     <span class="nb">int</span><span class="p">(</span><span class="n">weather</span><span class="o">.</span><span class="n">AVERAGE_TEMP_FEATURE</span><span class="p">))</span>
 </pre></div>
 </div>
-<p>You can use <code class="docutils literal notranslate"><span class="pre">yapecs</span></code> within, e.g.,  a Jupyter Notebook by passing the
-configuration file as a second argument.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">importlib</span>
-<span class="kn">import</span> <span class="nn">yapecs</span>
-<span class="kn">import</span> <span class="nn">weather</span>
-
-<span class="c1"># Modify configuration</span>
-<span class="n">yapecs</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">weather</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">defaults</span><span class="p">,</span> <span class="s1">&#39;config.py&#39;</span><span class="p">)</span>
-
-<span class="c1"># Reload module to propogate changes</span>
-<span class="n">importlib</span><span class="o">.</span><span class="n">reload</span><span class="p">(</span><span class="n">weather</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>You can also swap between configurations via <code class="docutils literal notranslate"><span class="pre">yapecs.context</span></code>.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">yapecs</span>
-<span class="kn">import</span> <span class="nn">weather</span>
-
-<span class="c1"># Change configuration</span>
-<span class="k">with</span> <span class="n">yapecs</span><span class="o">.</span><span class="n">context</span><span class="p">(</span>
-    <span class="n">weather</span><span class="p">,</span>
-    <span class="n">weather</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">defaults</span><span class="p">,</span>
-    <span class="n">weather</span><span class="o">.</span><span class="n">DEFAULT_CONFIGURATION</span><span class="p">,</span>
-    <span class="s1">&#39;config.py&#39;</span><span class="p">):</span>
-
-    <span class="c1"># Run code using new configuration</span>
-    <span class="k">assert</span> <span class="ow">not</span> <span class="n">weather</span><span class="o">.</span><span class="n">TODAYS_TEMP_FEATURE</span>
-
-<span class="c1"># Previous configuration is restored</span>
-<span class="k">assert</span> <span class="n">weather</span><span class="o">.</span><span class="n">TODAYS_TEMP_FEATURE</span>
-</pre></div>
-</div>
 </div>
 <div class="section" id="running-tests">
 <h2>Running tests<a class="headerlink" href="#running-tests" title="Permalink to this headline">¶</a></h2>
@@ -394,8 +363,12 @@ configuration file as a second argument.</p>
 </div>
 <div class="section" id="considerations">
 <h2>Considerations<a class="headerlink" href="#considerations" title="Permalink to this headline">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">yapecs</span></code> imports the configuration file. This means the contents of the
-configuration file are executed. Only use configuration files you trust.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">yapecs</span></code> imports the configuration file. This means the contents of the
+configuration file are executed. Only use configuration files you trust.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">yapecs</span></code> cannot swap between configuration files, as this would require the
+module to be reloaded. This prevents usage in, e.g., a Jupyter Notebook.</p></li>
+</ul>
 </div>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
