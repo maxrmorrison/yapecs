@@ -261,33 +261,11 @@ imports).</p></li>
 given two features: 1) today’s temperature and 2) the average temperature
 during previous years. Our default configuration file
 (e.g., <code class="docutils literal notranslate"><span class="pre">weather/config/defaults.py</span></code>) might look like the following</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-
-
-<span class="c1">###############################################################################</span>
-<span class="c1"># Metadata</span>
-<span class="c1">###############################################################################</span>
-
-
-<span class="c1"># Path to this default configuration file</span>
-<span class="n">DEFAULT_CONFIGURATION</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
-
-
-<span class="c1">###############################################################################</span>
-<span class="c1"># Training</span>
-<span class="c1">###############################################################################</span>
-
-<span class="c1"># Number of items in a batch</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Number of items in a batch</span>
 <span class="n">BATCH_SIZE</span> <span class="o">=</span> <span class="mi">64</span>
 
 <span class="c1"># Optimizer learning rate</span>
 <span class="n">LEARNING_RATE</span> <span class="o">=</span> <span class="mf">1e-4</span>
-
-
-<span class="c1">###############################################################################</span>
-<span class="c1"># Features</span>
-<span class="c1">###############################################################################</span>
-
 
 <span class="c1"># Whether to use today&#39;s temperature as a feature</span>
 <span class="n">TODAYS_TEMP_FEATURE</span> <span class="o">=</span> <span class="kc">True</span>
