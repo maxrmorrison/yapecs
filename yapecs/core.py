@@ -34,7 +34,7 @@ def configure(config_module: ModuleType, config: Optional[Path] = None):
         # Raise if config file doesn't exist
         if not config.is_file():
             raise FileNotFoundError(
-                'Configuration file {config} does not exist')
+                f'Configuration file {config} does not exist')
 
     # Load config file as a module
     config_spec = importlib.util.spec_from_file_location('config', config)
