@@ -10,10 +10,14 @@ from typing import Optional
 ###############################################################################
 
 
-def configure(config_module: ModuleType, config: Optional[Path] = None):
+def configure(
+    module_name: str,
+    config_module: ModuleType,
+    config: Optional[Path] = None):
     """Update the configuration values
 
     Args:
+        module_name: The name of the module to configure
         config_module: The submodule containing configuration values
         config: The Python file containing the updated configuration values.
             If not provided and the ``--config`` parameter is a command-line
@@ -29,19 +33,36 @@ def configure(config_module: ModuleType, config: Optional[Path] = None):
             return
         if index == -1 or index + 1 == len(sys.argv):
             return
-        config = Path(sys.argv[index + 1])
 
-        # Raise if config file doesn't exist
-        if not config.is_file():
-            raise FileNotFoundError(
-                f'Configuration file {config} does not exist')
+        configs = []
+        i = index + 1
+        while i < len(sys.argv) and not sys.argv[i].startswith('--'):
+            path = Path(sys.argv[i])
 
-    # Load config file as a module
-    config_spec = importlib.util.spec_from_file_location('config', config)
-    updated_module = importlib.util.module_from_spec(config_spec)
-    config_spec.loader.exec_module(updated_module)
+            # Raise if config file doesn't exist
+            if not path.is_file():
+                raise FileNotFoundError(
+                    f'Configuration file {path} does not exist')
 
-    # Merge config module and default config module
-    for parameter in dir(updated_module):
-        if hasattr(config_module, parameter):
-            setattr(config_module, parameter, getattr(updated_module, parameter))
+            configs.append(path)
+
+    else:
+
+        configs  = [config]
+
+    # Find the configuration with the matching module name
+    for config in configs:
+
+        # Load config file as a module
+        config_spec = importlib.util.spec_from_file_location('config', config)
+        updated_module = importlib.util.module_from_spec(config_spec)
+        config_spec.loader.exec_module(updated_module)
+
+        # Only update when the module name matches
+        if updated_module.MODULE != module_name:
+            continue
+
+        # Merge config module and default config module
+        for parameter in dir(updated_module):
+            if hasattr(config_module, parameter):
+                setattr(config_module, parameter, getattr(updated_module, parameter))

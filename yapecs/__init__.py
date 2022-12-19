@@ -48,8 +48,11 @@ during previous years. Our default configuration file
 
 Say we want to run an experiment without using today's temperature as
 a feature. We can create a new configuration file (e.g., ``config.py``) with
-just the changed parameters. ::
+just the module name and the changed parameters. ::
 
+    MODULE = '<module>'
+
+    # Whether to use today's temperature as a feature
     TODAYS_TEMP_FEATURE = False
 
 Using ``yapecs``, we pass our new file using the ``--config`` parameter. For
@@ -58,6 +61,10 @@ use the following ::
 
     python -m weather.train <args> --config config.py
 
+You can also pass a list of configuration files. This will apply all
+configuration files with a matching module name, in order ::
+
+    python -m weather.train <args> --config config-00.py config-01.py ...
 
 Usage
 =====
@@ -75,7 +82,7 @@ top of ``<module>/__init__.py`` ::
 
     # Modify configuration
     import yapecs
-    yapecs.configure(defaults)
+    yapecs.configure('<module>', defaults)
 
     # Import configuration parameters
     from .config.defaults import *
