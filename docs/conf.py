@@ -18,11 +18,11 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'yapecs'
-copyright = '2021, Max Morrison'
+copyright = '2022, Max Morrison'
 author = 'Max Morrison'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.1'
+release = '0.0.5'
 
 
 # -- General configuration ---------------------------------------------------

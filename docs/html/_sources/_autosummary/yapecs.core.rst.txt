@@ -1,0 +1,7 @@
+﻿yapecs.core
+===========
+
+.. contents::
+    :local:
+
+.. automodule:: yapecs.core
