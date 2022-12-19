@@ -45,6 +45,7 @@ def configure(
                     f'Configuration file {path} does not exist')
 
             configs.append(path)
+            i += 1
 
     else:
 
