@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 from types import ModuleType
 from typing import Optional
+import argparse
 
 
 ###############################################################################
@@ -67,3 +68,14 @@ def configure(
         for parameter in dir(updated_module):
             if hasattr(config_module, parameter):
                 setattr(config_module, parameter, getattr(updated_module, parameter))
+
+class ArgumentParser(argparse.ArgumentParser):
+    
+    def parse_args(self, args=None, namespace=None):
+        args, argv = self.parse_known_args(args, namespace)
+        if len(argv) == 2 and argv[0] == '--config':
+            return args
+        if argv:
+            msg = 'unrecognized arguments: %s'
+            self.error(msg % ' '.join(argv))
+        return args
