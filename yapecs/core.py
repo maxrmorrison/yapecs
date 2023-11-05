@@ -1,8 +1,9 @@
+from collections.abc import Sequence
 import importlib.util
 import sys
 from pathlib import Path
 from types import ModuleType
-from typing import Optional
+from typing import Any, Optional
 import argparse
 
 
@@ -70,12 +71,49 @@ def configure(
                 setattr(config_module, parameter, getattr(updated_module, parameter))
 
 class ArgumentParser(argparse.ArgumentParser):
-    
+
+    def __init__(
+        self,
+        prog = None,
+        usage = None,
+        description = None,
+        epilog = None,
+        # parents: Sequence[ArgumentParser] = ...,
+        # formatter_class = ...,
+        prefix_chars: str = "-",
+        fromfile_prefix_chars = None,
+        argument_default: Any = None,
+        conflict_handler: str = "error",
+        add_help: bool = True,
+        allow_abbrev: bool = True) -> None:
+
+        super().__init__(
+            prog=prog,
+            usage=usage,
+            description=description,
+            epilog=epilog,
+            # parents=parents,
+            # formatter_class=formatter_class,
+            prefix_chars=prefix_chars,
+            fromfile_prefix_chars=fromfile_prefix_chars,
+            argument_default=argument_default,
+            conflict_handler=conflict_handler,
+            add_help=add_help,
+            allow_abbrev=allow_abbrev)
+
+
+        self.add_argument(
+            '--config',
+            help='config files to use with yapecs. This argument was added automatically by yapecs.ArgumentParser',
+            nargs='*',
+            required=False
+        )
+
     def parse_args(self, args=None, namespace=None):
-        args, argv = self.parse_known_args(args, namespace)
-        if len(argv) == 2 and argv[0] == '--config':
-            return args
-        if argv:
-            msg = 'unrecognized arguments: %s'
-            self.error(msg % ' '.join(argv))
-        return args
+
+        arguments = super().parse_args(args, namespace)
+
+        if 'config' in arguments:
+            del arguments.__dict__['config']
+
+        return arguments
