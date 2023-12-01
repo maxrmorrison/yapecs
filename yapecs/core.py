@@ -1,9 +1,9 @@
+import argparse
 import importlib.util
 import sys
 from pathlib import Path
 from types import ModuleType
 from typing import Optional
-import argparse
 
 
 ###############################################################################
@@ -14,7 +14,8 @@ import argparse
 def configure(
     module_name: str,
     config_module: ModuleType,
-    config: Optional[Path] = None):
+    config: Optional[Path] = None
+):
     """Update the configuration values
 
     Args:
@@ -70,7 +71,7 @@ def configure(
                 setattr(config_module, parameter, getattr(updated_module, parameter))
 
 class ArgumentParser(argparse.ArgumentParser):
-    
+
     def parse_args(self, args=None, namespace=None):
         args, argv = self.parse_known_args(args, namespace)
         if len(argv) == 2 and argv[0] == '--config':
