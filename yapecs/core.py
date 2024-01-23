@@ -70,13 +70,24 @@ def configure(
             if hasattr(config_module, parameter):
                 setattr(config_module, parameter, getattr(updated_module, parameter))
 
+
 class ArgumentParser(argparse.ArgumentParser):
 
     def parse_args(self, args=None, namespace=None):
+        """Parse arguments while allowing unregistered config argument"""
+        # Parse
         args, argv = self.parse_known_args(args, namespace)
-        if len(argv) == 2 and argv[0] == '--config':
+
+        # Get unregistered arguments
+        unknown = [arg for arg in argv if arg.startswith('--')]
+
+        # Allow unregistered config argument
+        if len(unknown) == 1 and unknown[0] == '--config':
             return args
-        if argv:
-            msg = 'unrecognized arguments: %s'
-            self.error(msg % ' '.join(argv))
+
+        # Disallow other unregistered arguments
+        if len(unknown) > 0:
+            unknown = [arg for arg in unknown if arg != '--config']
+            self.error(f'Unrecognized arguments: {unknown}')
+
         return args
