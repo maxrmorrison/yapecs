@@ -119,21 +119,48 @@ def import_with_configs(module, config_paths):
 
 class ArgumentParser(argparse.ArgumentParser):
 
+    def __init__(
+        self,
+        prog = None,
+        usage = None,
+        description = None,
+        epilog = None,
+        # parents: Sequence[ArgumentParser] = ...,
+        # formatter_class = ...,
+        prefix_chars: str = "-",
+        fromfile_prefix_chars = None,
+        argument_default: Any = None,
+        conflict_handler: str = "error",
+        add_help: bool = True,
+        allow_abbrev: bool = True) -> None:
+
+        super().__init__(
+            prog=prog,
+            usage=usage,
+            description=description,
+            epilog=epilog,
+            # parents=parents,
+            # formatter_class=formatter_class,
+            prefix_chars=prefix_chars,
+            fromfile_prefix_chars=fromfile_prefix_chars,
+            argument_default=argument_default,
+            conflict_handler=conflict_handler,
+            add_help=add_help,
+            allow_abbrev=allow_abbrev)
+
+
+        self.add_argument(
+            '--config',
+            help='config files to use with yapecs. This argument was added automatically by yapecs.ArgumentParser',
+            nargs='*',
+            required=False
+        )
+
     def parse_args(self, args=None, namespace=None):
-        """Parse arguments while allowing unregistered config argument"""
-        # Parse
-        args, argv = self.parse_known_args(args, namespace)
 
-        # Get unregistered arguments
-        unknown = [arg for arg in argv if arg.startswith('--')]
+        arguments = super().parse_args(args, namespace)
 
-        # Allow unregistered config argument
-        if len(unknown) == 1 and unknown[0] == '--config':
-            return args
+        if 'config' in arguments:
+            del arguments.__dict__['config']
 
-        # Disallow other unregistered arguments
-        if len(unknown) > 0:
-            unknown = [arg for arg in unknown if arg != '--config']
-            self.error(f'Unrecognized arguments: {unknown}')
-
-        return args
+        return arguments
