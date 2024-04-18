@@ -121,14 +121,64 @@ class ArgumentParser(argparse.ArgumentParser):
 
     def __init__(
         self,
-        *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+        prog=None,
+        usage=None,
+        description=None,
+        epilog=None,
+        parents=[],
+        formatter_class=HelpFormatter,
+        prefix_chars='-',
+        fromfile_prefix_chars=None,
+        argument_default=None,
+        conflict_handler='error',
+        add_help=True,
+        allow_abbrev=True,
+        exit_on_error=True
+    ):
+        """Object for parsing command-line arguments which include a yapecs '--config' option.
+        If you manually define a '--config' option for use elsewhere, use argparse.ArgumentParser instead.
+
+        Keyword Arguments:
+            - prog -- The name of the program (default:
+                ``os.path.basename(sys.argv[0])``)
+            - usage -- A usage message (default: auto-generated from arguments)
+            - description -- A description of what the program does
+            - epilog -- Text following the argument descriptions
+            - parents -- Parsers whose arguments should be copied into this one
+            - formatter_class -- HelpFormatter class for printing help messages
+            - prefix_chars -- Characters that prefix optional arguments
+            - fromfile_prefix_chars -- Characters that prefix files containing
+                additional arguments
+            - argument_default -- The default value for all arguments
+            - conflict_handler -- String indicating how to handle conflicts
+            - add_help -- Add a -h/-help option
+            - allow_abbrev -- Allow long options to be abbreviated unambiguously
+            - exit_on_error -- Determines whether or not ArgumentParser exits with
+                error info when an error occurs
+        """
+        result = super().__init__(
+                 prog=prog,
+                 usage=usage,
+                 description=description,
+                 epilog=epilog,
+                 parents=parents,
+                 formatter_class=formatter_class,
+                 prefix_chars=prefix_chars,
+                 fromfile_prefix_chars=fromfile_prefix_chars,
+                 argument_default=argument_default,
+                 conflict_handler=conflict_handler,
+                 add_help=add_help,
+                 allow_abbrev=allow_abbrev,
+                 exit_on_error=exit_on_error
+        )
         self.add_argument(
             '--config',
             help='config files to use with yapecs. This argument was added automatically by yapecs.ArgumentParser',
             nargs='*',
             required=False
         )
+        return result
+
     def parse_args(self, args=None, namespace=None):
 
         arguments = super().parse_args(args, namespace)
@@ -137,6 +187,3 @@ class ArgumentParser(argparse.ArgumentParser):
             del arguments.__dict__['config']
 
         return arguments
-
-ArgumentParser.__signature__ = argparse.ArgumentParser.__signature__
-ArgumentParser.__annotations__ = argparse.ArgumentParser.__annotations__
