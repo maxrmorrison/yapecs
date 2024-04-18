@@ -4,12 +4,18 @@ import sys
 from pathlib import Path
 from types import ModuleType
 from typing import Optional
+from copy import copy
 
 
 ###############################################################################
 # Configuration
 ###############################################################################
 
+def import_from_path(name, path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 def configure(
     module_name: str,
@@ -57,9 +63,7 @@ def configure(
     for config in configs:
 
         # Load config file as a module
-        config_spec = importlib.util.spec_from_file_location('config', config)
-        updated_module = importlib.util.module_from_spec(config_spec)
-        config_spec.loader.exec_module(updated_module)
+        updated_module = import_from_path('config', config)
 
         # Only update when the module name matches
         if updated_module.MODULE != module_name:
@@ -70,6 +74,48 @@ def configure(
             if hasattr(config_module, parameter):
                 setattr(config_module, parameter, getattr(updated_module, parameter))
 
+
+def import_with_configs(module, config_paths):
+    #TODO create a lock to prevent potential issues when using multithreading issues
+
+    # handle sys.argv changes
+    original_argv = copy(sys.argv)
+    if '--config' in sys.argv:
+        raise ValueError('cannot replace --config, --config must not be set in sys.argv')
+    sys.argv.append('--config')
+    assert len(config_paths) >= 1
+    for config_path in config_paths:
+        sys.argv.append(config_path)
+
+    # temporarily clear sys.modules to ensure that other modules are configured properly
+    original_modules = copy(sys.modules)
+    config_module_names = [] # names of corresponding modules for all config files
+    for config_path in config_paths:
+        config_module = import_from_path('config', config_path)
+        config_module_names.append(config_module.MODULE)
+    to_delete = []
+    for module_name in sys.modules.keys():
+        if module_name.split('.')[0] in config_module_names:
+            to_delete.append(module_name)
+    for module_name in to_delete:
+        del sys.modules[module_name]
+
+    # import the module
+    name = module.__name__
+    path = module.__path__
+    if isinstance(path, list):
+        path = path[0] #TODO investigate remifications
+    if not path.endswith('.py'):
+        path = path + '/__init__.py' #TODO make better
+    module = import_from_path(name, path)
+
+    # revert sys.modules
+    sys.modules = original_modules
+
+    # revert sys.argv
+    sys.argv = original_argv
+
+    return module
 
 class ArgumentParser(argparse.ArgumentParser):
 
