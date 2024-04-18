@@ -121,41 +121,14 @@ class ArgumentParser(argparse.ArgumentParser):
 
     def __init__(
         self,
-        prog = None,
-        usage = None,
-        description = None,
-        epilog = None,
-        # parents: Sequence[ArgumentParser] = ...,
-        # formatter_class = ...,
-        prefix_chars: str = "-",
-        fromfile_prefix_chars = None,
-        argument_default: Any = None,
-        conflict_handler: str = "error",
-        add_help: bool = True,
-        allow_abbrev: bool = True) -> None:
-
-        super().__init__(
-            prog=prog,
-            usage=usage,
-            description=description,
-            epilog=epilog,
-            # parents=parents,
-            # formatter_class=formatter_class,
-            prefix_chars=prefix_chars,
-            fromfile_prefix_chars=fromfile_prefix_chars,
-            argument_default=argument_default,
-            conflict_handler=conflict_handler,
-            add_help=add_help,
-            allow_abbrev=allow_abbrev)
-
-
+        *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.add_argument(
             '--config',
             help='config files to use with yapecs. This argument was added automatically by yapecs.ArgumentParser',
             nargs='*',
             required=False
         )
-
     def parse_args(self, args=None, namespace=None):
 
         arguments = super().parse_args(args, namespace)
@@ -164,3 +137,6 @@ class ArgumentParser(argparse.ArgumentParser):
             del arguments.__dict__['config']
 
         return arguments
+
+ArgumentParser.__signature__ = argparse.ArgumentParser.__signature__
+ArgumentParser.__annotations__ = argparse.ArgumentParser.__annotations__
