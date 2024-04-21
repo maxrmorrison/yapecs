@@ -126,7 +126,7 @@ class ArgumentParser(argparse.ArgumentParser):
         description=None,
         epilog=None,
         parents=[],
-        formatter_class=HelpFormatter,
+        formatter_class=argparse.HelpFormatter,
         prefix_chars='-',
         fromfile_prefix_chars=None,
         argument_default=None,
