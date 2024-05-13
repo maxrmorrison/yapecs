@@ -1,4 +1,0 @@
-yapecs
-=======
-
-.. automodule:: yapecs
