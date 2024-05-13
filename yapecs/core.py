@@ -5,7 +5,7 @@ import os
 import sys
 from pathlib import Path
 from types import ModuleType
-from typing import Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 
 ###############################################################################
@@ -85,8 +85,22 @@ def configure(
 
 class ArgumentParser(argparse.ArgumentParser):
 
-    def parse_args(self, args=None, namespace=None):
-        """Parse arguments while allowing unregistered config argument"""
+    def parse_args(
+        self,
+        args: Optional[List[str]] = None,
+        namespace: Optional[argparse.Namespace] = None
+    ) -> argparse.Namespace:
+        """Parse arguments while allowing unregistered config argument
+
+        Arguments
+            args
+                Arguments to parse. Default is taken from sys.argv.
+            namespace
+                Object to hold the attributes. Default is an empty Namespace.
+
+        Returns
+            Namespace containing program arguments
+        """
         # Parse
         args, argv = self.parse_known_args(args, namespace)
 

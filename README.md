@@ -172,14 +172,44 @@ def configure(
 ### `yapecs.grid_search`
 
 ```python
-TODO
-```
+def grid_search(progress_file: Union[str, os.PathLike], *args: Tuple) -> Tuple:
+    """Perform a grid search over configuration arguments
 
+    Arguments
+        progress_file
+            File to store current search progress
+        args
+            Lists of argument values to perform grid search over
+
+    Returns
+        current_args
+            The arguments that should be used by the current process
+    """
+```
 
 ### `yapecs.ArgumentParser`
 
+This is a lightweight wrapper around [`argparse.ArgumentParser`](https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser). The only change is the `parse_args` function.
+
 ```python
-TODO
+class ArgumentParser(argparse.ArgumentParser):
+
+    def parse_args(
+        self,
+        args: Optional[List[str]] = None,
+        namespace: Optional[argparse.Namespace] = None
+    ) -> argparse.Namespace:
+        """Parse arguments while allowing unregistered config argument
+
+        Arguments
+            args
+                Arguments to parse. Default is taken from sys.argv.
+            namespace
+                Object to hold the attributes. Default is an empty Namespace.
+
+        Returns
+            Namespace containing program arguments
+        """
 ```
 
 
