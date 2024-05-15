@@ -141,7 +141,7 @@ The second change we make is to add `--config` as a command-line option. We crea
 
 ### Hyperparameter search
 
-**TODO**
+
 
 
 ## Application programming interface (API)
