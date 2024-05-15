@@ -24,6 +24,7 @@ alternative to using JSON or YAML files, or more complex solutions such as
 - [Usage](#usage)
   * [Configuration](#configuration)
   * [Hyperparameter search](#hyperparameter-search)
+  * [Importing with different configs](#importing-with-different-configs)
 - [Application programming interface (API)](#application-programming-interface-api)
   * [`yapecs.configure`](#yapecsconfigure)
   * [`yapecs.grid_search`](#yapecsgrid_search)
@@ -201,6 +202,19 @@ while python -m ppgs.train --config causal_transformer_search.py; do :; done
 ```
 
 which will run the training repeatedly, incrementing the progress index and choosing the appropriate config values each time until the search is complete.
+
+## Importing with different configs
+
+When working with and comparing multiple configs, you can load the same module multiple times with different configs by using `yapecs.import_with_configs`.
+
+```py
+import yapecs
+import weather
+
+weather_no_humidity = yapecs.import_with_configs(weather, ['no-humidity.py'])
+weather_no_windspeed = yapecs.import_with_configs(weather, ['no-humidity.py'])
+
+```
 
 ## Application programming interface (API)
 
