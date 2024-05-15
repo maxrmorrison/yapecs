@@ -141,8 +141,66 @@ The second change we make is to add `--config` as a command-line option. We crea
 
 ### Hyperparameter search
 
+To perform a hyperparamter search, you can write a single config file containing values over which to perform a grid search.
+
+Here is a commented example config which performs a grid search over the values for `HIDDEN_CHANNELS`, `NUM_HIDDEN_LAYERS`, and `KERNEL_SIZE`:
+
+```py
+MODULE = 'ppgs'
+
+from pathlib import Path
+from itertools import product
+import torch
+
+import ppgs
+import yapecs
+
+# Make sure this code only runs once, when ppgs is being configured.
+#  Otherwise, the progress value might be incremented multiple times.
+if hasattr(ppgs, "defaults"):
+
+    progress_file = Path(__file__).parent / 'causal_transformer_search.progress'
+
+    # Values that we want to search over
+    hidden_channels = [64, 128, 256, 512]
+    num_hidden_layers = [3, 4, 5]
+    kernel_size = [3, 5, 7]
+
+    # Here we use `yapecs.grid_search` which handles loading and saving the progress file and computing the current combination of config values.
+    HIDDEN_CHANNELS, NUM_HIDDEN_LAYERS, KERNEL_SIZE = yapecs.grid_search(
+        progress_file,
+        hidden_channels,
+        num_hidden_layers,
+        kernel_size
+    )
+
+    # Name the config using the specific values for this run.
+    CONFIG = f"causal_transformer_search/{HIDDEN_CHANNELS}-{NUM_HIDDEN_LAYERS}-{KERNEL_SIZE}".replace('.', '_')
+    print(CONFIG)
 
 
+# Additional config values
+
+# Dimensionality of input representation
+INPUT_CHANNELS = 80
+
+# Input representation
+REPRESENTATION = 'mel'
+
+# Number of training steps
+STEPS = 50_000
+
+IS_CAUSAL = True
+CHECKPOINT_INTERVAL = 25_000  # steps
+```
+
+Then you can perform the search by running a command similar to
+
+```sh
+while python -m ppgs.train --config causal_transformer_search.py; do :; done
+```
+
+which will run the training repeatedly, incrementing the progress index and choosing the appropriate config values each time until the search is complete.
 
 ## Application programming interface (API)
 
