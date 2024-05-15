@@ -3,7 +3,7 @@ import importlib.util
 import sys
 from pathlib import Path
 from types import ModuleType
-from typing import Optional
+from typing import Optional, Union, List
 from copy import copy
 
 
@@ -11,7 +11,15 @@ from copy import copy
 # Configuration
 ###############################################################################
 
-def import_from_path(name, path):
+def import_from_path(
+    name: str, 
+    path: Union[Path, str]):
+    """Import module from a filesystem path
+
+    Args:
+        name: the name of the module
+        path: the path to import from
+    """
     spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -56,7 +64,6 @@ def configure(
             i += 1
 
     else:
-
         configs  = [config]
 
     # Find the configuration with the matching module name
@@ -75,10 +82,19 @@ def configure(
                 setattr(config_module, parameter, getattr(updated_module, parameter))
 
 
-def import_with_configs(module, config_paths):
+def import_with_configs(
+        module: ModuleType,
+        config_paths: List[str]):
+    """Import an instance of a module with a list of configs applied
+
+    Args:
+        module: the module to re-import with configs applied
+        config_paths: a list of strings containing paths to yapecs config files
+    """
     #TODO create a lock to prevent potential issues when using multithreading issues
 
     # handle sys.argv changes
+    #  simulates adding `--config config_paths[0] config_paths[1]...` to sys.argv
     original_argv = copy(sys.argv)
     if '--config' in sys.argv:
         raise ValueError('cannot replace --config, --config must not be set in sys.argv')
@@ -87,7 +103,8 @@ def import_with_configs(module, config_paths):
     for config_path in config_paths:
         sys.argv.append(config_path)
 
-    # temporarily clear sys.modules to ensure that other modules are configured properly
+    # temporarily remove modules for which configs are present
+    #  from sys.modules to ensure that other modules are configured properly
     original_modules = copy(sys.modules)
     config_module_names = [] # names of corresponding modules for all config files
     for config_path in config_paths:
