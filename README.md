@@ -23,8 +23,8 @@ alternative to using JSON or YAML files, or more complex solutions such as
 
 - [Usage](#usage)
   * [Configuration](#configuration)
+  * [Composition](#composition)
   * [Hyperparameter search](#hyperparameter-search)
-  * [Importing with different configs](#importing-with-different-configs)
 - [Application programming interface (API)](#application-programming-interface-api)
   * [`yapecs.configure`](#yapecsconfigure)
   * [`yapecs.grid_search`](#yapecsgrid_search)
@@ -140,13 +140,30 @@ from .config.static import *  # Import dependent parameters after configuration
 
 The second change we make is to add `--config` as a command-line option. We created a lightweight replacement for `argparse.ArgumentParser`, called `yapecs.ArgumentParser`, which does this.
 
+
+## Composing configured modules
+
+When working with multiple configurations of the same module, you can load the module multiple times with different configs by using `yapecs.compose`.
+
+```python
+import yapecs
+import weather
+
+# Compose base module with configuration file
+weather_compose = yapecs.compose(weather, ['config.py'])
+
+# Test that the modules are now different
+assert weather.TODAYS_TEMP_FEATURE and not weather_compose.TODAYS_TEMP_FEATURE
+```
+
+
 ### Hyperparameter search
 
-To perform a hyperparamter search, you can write a single config file containing values over which to perform a grid search.
+To perform a hyperparameter search, write a single config file containing values over which to perform a grid search.
 
-Here is a commented example config which performs a grid search over the values for `HIDDEN_CHANNELS`, `NUM_HIDDEN_LAYERS`, and `KERNEL_SIZE`:
+Here is an example (from [this repo](https://github.com/interactiveaudiolab/ppgs)), which performs a grid search over configuration parameters `HIDDEN_CHANNELS`, `NUM_HIDDEN_LAYERS`, and `KERNEL_SIZE`:
 
-```py
+```python
 MODULE = 'ppgs'
 
 from pathlib import Path
@@ -156,9 +173,14 @@ import torch
 import ppgs
 import yapecs
 
-# Make sure this code only runs once, when ppgs is being configured.
-#  Otherwise, the progress value might be incremented multiple times.
-if hasattr(ppgs, "defaults"):
+
+###############################################################################
+# Hyperparameter search
+###############################################################################
+
+
+# This code only runs once (during configuration setup)
+if hasattr(ppgs, 'defaults'):
 
     progress_file = Path(__file__).parent / 'causal_transformer_search.progress'
 
@@ -167,54 +189,50 @@ if hasattr(ppgs, "defaults"):
     num_hidden_layers = [3, 4, 5]
     kernel_size = [3, 5, 7]
 
-    # Here we use `yapecs.grid_search` which handles loading and saving the progress file and computing the current combination of config values.
+    # yapecs.grid_search handles loading and saving the progress file as well
+    # as computing the current combination of config values
     HIDDEN_CHANNELS, NUM_HIDDEN_LAYERS, KERNEL_SIZE = yapecs.grid_search(
         progress_file,
         hidden_channels,
         num_hidden_layers,
-        kernel_size
-    )
+        kernel_size)
 
     # Name the config using the specific values for this run.
-    CONFIG = f"causal_transformer_search/{HIDDEN_CHANNELS}-{NUM_HIDDEN_LAYERS}-{KERNEL_SIZE}".replace('.', '_')
-    print(CONFIG)
+    CONFIG = (
+        f'causal_transformer_search/'
+        f'{HIDDEN_CHANNELS}-{NUM_HIDDEN_LAYERS}-{KERNEL_SIZE}'
+    ).replace('.', '_')
 
 
-# Additional config values
+###############################################################################
+# Additional configuration
+###############################################################################
+
+
+# Number of steps between saving checkpoints
+CHECKPOINT_INTERVAL = 25_000  # steps
 
 # Dimensionality of input representation
 INPUT_CHANNELS = 80
+
+# Whether to mask future values
+IS_CAUSAL = True
 
 # Input representation
 REPRESENTATION = 'mel'
 
 # Number of training steps
 STEPS = 50_000
-
-IS_CAUSAL = True
-CHECKPOINT_INTERVAL = 25_000  # steps
 ```
 
-Then you can perform the search by running a command similar to
+You can perform the search by running, e.g.,
 
-```sh
+```bash
 while python -m ppgs.train --config causal_transformer_search.py; do :; done
 ```
 
-which will run the training repeatedly, incrementing the progress index and choosing the appropriate config values each time until the search is complete.
+This runs training repeatedly, incrementing the progress index and choosing the appropriate config values each time until the search is complete. Running a hyperparameter search in parallel is not (yet) supported.
 
-## Importing with different configs
-
-When working with and comparing multiple configs, you can load the same module multiple times with different configs by using `yapecs.import_with_configs`.
-
-```py
-import yapecs
-import weather
-
-weather_no_humidity = yapecs.import_with_configs(weather, ['no-humidity.py'])
-weather_no_windspeed = yapecs.import_with_configs(weather, ['no-humidity.py'])
-
-```
 
 ## Application programming interface (API)
 
@@ -259,9 +277,10 @@ def grid_search(progress_file: Union[str, os.PathLike], *args: Tuple) -> Tuple:
     """
 ```
 
+
 ### `yapecs.ArgumentParser`
 
-This is a lightweight wrapper around [`argparse.ArgumentParser`](https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser). The only changes are in the `__init__` and `parse_args` functions.
+This is a lightweight wrapper around [`argparse.ArgumentParser`](https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser) that defines and manages a `--config` parameter.
 
 ```python
 class ArgumentParser(argparse.ArgumentParser):

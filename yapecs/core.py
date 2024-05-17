@@ -3,10 +3,10 @@ import importlib.util
 import itertools
 import os
 import sys
+from copy import copy
 from pathlib import Path
 from types import ModuleType
-from typing import List, Optional, Union, Tuple
-from copy import copy
+from typing import List, Optional, Tuple, Union
 
 
 ###############################################################################
@@ -14,24 +14,10 @@ from copy import copy
 ###############################################################################
 
 
-def import_from_path(
-    name: str, 
-    path: Union[Path, str]):
-    """Import module from a filesystem path
-
-    Args:
-        name: the name of the module
-        path: the path to import from
-    """
-    spec = importlib.util.spec_from_file_location(name, path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
 def configure(
     module_name: str,
     config_module: ModuleType,
-    config: Optional[Path] = None
+    config: Optional[Union[str, Path]] = None
 ) -> None:
     """Update the configuration values
 
@@ -48,6 +34,7 @@ def configure(
     # Get config file
     if config is None:
 
+        # Get argv index of configuration
         try:
             index = sys.argv.index('--config')
         except:
@@ -55,9 +42,10 @@ def configure(
         if index == -1 or index + 1 == len(sys.argv):
             return
 
+        # Get all configurations
         configs = []
         i = index + 1
-        while i < len(sys.argv) and not sys.argv[i].startswith('--'):
+        while i < len(sys.argv) and not str(sys.argv[i]).startswith('--'):
             path = Path(sys.argv[i])
 
             # Raise if config file doesn't exist
@@ -91,35 +79,43 @@ def configure(
 
 
 ###############################################################################
-# Importing with configs
+# Compose a configured module from an existing module
 ###############################################################################
 
 
-def import_with_configs(
-        module: ModuleType,
-        config_paths: List[str]):
-    """Import an instance of a module with a list of configs applied
+def compose(
+    module: ModuleType,
+    config_paths: List[Union[str, Path]]
+) -> ModuleType:
+    """Compose a configured module from a base module and list of configs
 
-    Args:
-        module: the module to re-import with configs applied
-        config_paths: a list of strings containing paths to yapecs config files
+    Arguments
+        module
+            The base module to configure
+        config_paths
+            A list of paths to yapecs config files
+
+    Returns
+        composed
+            A new module made from the base module and configurations
     """
-    #TODO create a lock to prevent potential issues when using multithreading issues
+    # TODO create a lock to prevent potential issues when using multithreading
 
-    # handle sys.argv changes
-    #  simulates adding `--config config_paths[0] config_paths[1]...` to sys.argv
+    # Handle sys.argv changes by adding
+    # `--config config_paths[0] config_paths[1]...`
     original_argv = copy(sys.argv)
     if '--config' in sys.argv:
-        raise ValueError('cannot replace --config, --config must not be set in sys.argv')
+        raise ValueError(
+            'cannot replace --config, --config must not be set in sys.argv')
     sys.argv.append('--config')
     assert len(config_paths) >= 1
     for config_path in config_paths:
         sys.argv.append(config_path)
 
-    # temporarily remove modules for which configs are present
-    #  from sys.modules to ensure that other modules are configured properly
+    # Temporarily remove configured modules from sys.modules to ensure
+    # that other modules are configured properly
     original_modules = copy(sys.modules)
-    config_module_names = [] # names of corresponding modules for all config files
+    config_module_names = []
     for config_path in config_paths:
         config_module = import_from_path('config', config_path)
         config_module_names.append(config_module.MODULE)
@@ -130,7 +126,7 @@ def import_with_configs(
     for module_name in to_delete:
         del sys.modules[module_name]
 
-    # import the module
+    # Import the module
     name = module.__name__
     path = module.__path__
     if isinstance(path, list):
@@ -139,10 +135,10 @@ def import_with_configs(
         path = path + '/__init__.py' #TODO make better
     module = import_from_path(name, path)
 
-    # revert sys.modules
+    # Revert sys.modules
     sys.modules = original_modules
 
-    # revert sys.argv
+    # Revert sys.argv
     sys.argv = original_argv
 
     return module
@@ -171,51 +167,77 @@ class ArgumentParser(argparse.ArgumentParser):
         allow_abbrev=True,
         exit_on_error=True
     ):
-        """Object for parsing command-line arguments which include a yapecs '--config' option.
-        If you manually define a '--config' option for use elsewhere, use argparse.ArgumentParser instead.
+        """Command-line argument parsing for yapecs. If you manually define
+        a '--config' argument for use elsewhere, use argparse.ArgumentParser.
 
-        Keyword Arguments:
-            - prog -- The name of the program (default:
-                ``os.path.basename(sys.argv[0])``)
-            - usage -- A usage message (default: auto-generated from arguments)
-            - description -- A description of what the program does
-            - epilog -- Text following the argument descriptions
-            - parents -- Parsers whose arguments should be copied into this one
-            - formatter_class -- HelpFormatter class for printing help messages
-            - prefix_chars -- Characters that prefix optional arguments
-            - fromfile_prefix_chars -- Characters that prefix files containing
-                additional arguments
-            - argument_default -- The default value for all arguments
-            - conflict_handler -- String indicating how to handle conflicts
-            - add_help -- Add a -h/-help option
-            - allow_abbrev -- Allow long options to be abbreviated unambiguously
-            - exit_on_error -- Determines whether or not ArgumentParser exits with
-                error info when an error occurs
+        Arguments
+            prog
+                The name of the program
+                (default: ``os.path.basename(sys.argv[0])``)
+            usage
+                A usage message (default: auto-generated from arguments)
+            description
+                A description of what the program does
+            epilog
+                Text following the argument descriptions
+            parents
+                Parsers whose arguments should be copied into this one
+            formatter_class
+                HelpFormatter class for printing help messages
+            prefix_chars
+                Characters that prefix optional arguments
+            fromfile_prefix_chars
+                Characters that prefix files containing additional arguments
+            argument_default
+                The default value for all arguments
+            conflict_handler
+                String indicating how to handle conflicts
+            add_help
+                Add a -h/-help option
+            allow_abbrev
+                Allow long options to be abbreviated unambiguously
+            exit_on_error
+                Determines whether or not ArgumentParser exits with error info
+                when an error occurs
         """
         result = super().__init__(
-                 prog=prog,
-                 usage=usage,
-                 description=description,
-                 epilog=epilog,
-                 parents=parents,
-                 formatter_class=formatter_class,
-                 prefix_chars=prefix_chars,
-                 fromfile_prefix_chars=fromfile_prefix_chars,
-                 argument_default=argument_default,
-                 conflict_handler=conflict_handler,
-                 add_help=add_help,
-                 allow_abbrev=allow_abbrev,
-                 exit_on_error=exit_on_error
-        )
+            prog=prog,
+            usage=usage,
+            description=description,
+            epilog=epilog,
+            parents=parents,
+            formatter_class=formatter_class,
+            prefix_chars=prefix_chars,
+            fromfile_prefix_chars=fromfile_prefix_chars,
+            argument_default=argument_default,
+            conflict_handler=conflict_handler,
+            add_help=add_help,
+            allow_abbrev=allow_abbrev,
+            exit_on_error=exit_on_error)
         self.add_argument(
             '--config',
-            help='config files to use with yapecs. This argument was added automatically by yapecs.ArgumentParser',
+            help='Yapecs configuration file; added by yapecs.ArgumentParser',
+            type=Path,
             nargs='*',
-            required=False
-        )
+            required=False)
         return result
 
-    def parse_args(self, args=None, namespace=None):
+    def parse_args(
+        self,
+        args: Optional[List[str]] = None,
+        namespace: Optional[argparse.Namespace] = None
+    ) -> argparse.Namespace:
+        """Parse arguments while allowing unregistered config argument
+
+        Arguments
+            args
+                Arguments to parse. Default is taken from sys.argv.
+            namespace
+                Object to hold the attributes. Default is an empty Namespace.
+
+        Returns
+            Namespace containing program arguments
+        """
         arguments = super().parse_args(args, namespace)
 
         if 'config' in arguments:
@@ -261,3 +283,27 @@ def grid_search(progress_file: Union[str, os.PathLike], *args: Tuple) -> Tuple:
 
     # Get corresponding argument combination
     return combinations[progress]
+
+
+###############################################################################
+# Utilities
+###############################################################################
+
+
+def import_from_path(name: str, path: Union[Path, str]) -> ModuleType:
+    """Import module from a filesystem path
+
+    Arguments
+        name
+            The name of the module
+        path
+            The configuration file to import
+
+    Returns
+        module
+            The imported module
+    """
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module

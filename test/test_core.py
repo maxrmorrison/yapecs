@@ -9,6 +9,24 @@ import yapecs
 ###############################################################################
 
 
+def test_compose():
+    """Test yapecs configuration composition"""
+    # Import module
+    import weather
+
+    # Check that value is as expected
+    assert weather.TODAYS_TEMP_FEATURE
+
+    # Modify configuration
+    weather_compose = yapecs.compose(
+        weather,
+        [Path(__file__).parent / 'config' / 'config.py'])
+
+    # Check that value was updated
+    assert weather.TODAYS_TEMP_FEATURE
+    assert not weather_compose.TODAYS_TEMP_FEATURE
+
+
 def test_configuration():
     """Test yapecs configuration"""
     # NOTE - This is just for testing purposes and is not a valid way to
