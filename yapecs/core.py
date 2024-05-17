@@ -84,14 +84,14 @@ def configure(
 
 
 def compose(
-    module: ModuleType,
+    name: str,
     config_paths: List[Union[str, Path]]
 ) -> ModuleType:
     """Compose a configured module from a base module and list of configs
 
     Arguments
-        module
-            The base module to configure
+        name
+            Name of the base module to configure
         config_paths
             A list of paths to yapecs config files
 
@@ -103,7 +103,7 @@ def compose(
 
     # Handle sys.argv changes by adding
     # `--config config_paths[0] config_paths[1]...`
-    original_argv = copy(sys.argv)
+    original_argv_len = len(sys.argv)
     if '--config' in sys.argv:
         raise ValueError(
             'cannot replace --config, --config must not be set in sys.argv')
@@ -114,7 +114,7 @@ def compose(
 
     # Temporarily remove configured modules from sys.modules to ensure
     # that other modules are configured properly
-    original_modules = copy(sys.modules)
+    to_restore = {}
     config_module_names = []
     for config_path in config_paths:
         config_module = import_from_path('config', config_path)
@@ -124,22 +124,19 @@ def compose(
         if module_name.split('.')[0] in config_module_names:
             to_delete.append(module_name)
     for module_name in to_delete:
+        to_restore[module_name] = sys.modules[module_name]
         del sys.modules[module_name]
 
     # Import the module
-    name = module.__name__
-    path = module.__path__
-    if isinstance(path, list):
-        path = path[0] #TODO investigate remifications
-    if not path.endswith('.py'):
-        path = path + '/__init__.py' #TODO make better
-    module = import_from_path(name, path)
+    module = importlib.import_module(name)
 
     # Revert sys.modules
-    sys.modules = original_modules
+    for module_name, module_object in to_restore.items():
+        sys.modules[module_name] = module_object
 
     # Revert sys.argv
-    sys.argv = original_argv
+    while len(sys.argv) > original_argv_len:
+        del sys.argv[-1]
 
     return module
 

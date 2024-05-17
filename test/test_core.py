@@ -17,9 +17,9 @@ def test_compose():
     # Check that value is as expected
     assert weather.TODAYS_TEMP_FEATURE
 
-    # Modify configuration
+    # re-import with composed configuration
     weather_compose = yapecs.compose(
-        weather,
+        'weather',
         [Path(__file__).parent / 'config' / 'config.py'])
 
     # Check that value was updated
