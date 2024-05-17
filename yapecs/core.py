@@ -120,7 +120,7 @@ def compose(
         config_module = import_from_path('config', config_path)
         config_module_names.append(config_module.MODULE)
     to_delete = []
-    for module_name in sys.modules.keys():
+    for module_name in copy(sys.modules).keys():
         if module_name.split('.')[0] in config_module_names:
             to_delete.append(module_name)
     for module_name in to_delete:
