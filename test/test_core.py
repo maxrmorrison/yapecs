@@ -23,6 +23,7 @@ def test_configuration():
 
     # Modify configuration
     yapecs.configure(
+        'weather',
         weather.config.defaults,
         Path(__file__).parent / 'config' / 'config.py')
 
