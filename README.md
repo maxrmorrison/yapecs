@@ -27,6 +27,7 @@ alternative to using JSON or YAML files, or more complex solutions such as
   * [Hyperparameter search](#hyperparameter-search)
 - [Application programming interface (API)](#application-programming-interface-api)
   * [`yapecs.configure`](#yapecsconfigure)
+  * [`yapecs.compose`](#yapecscompose)
   * [`yapecs.grid_search`](#yapecsgrid_search)
   * [`yapecs.ArgumentParser`](#yapecsargumentparser)
 - [Community examples](#community-examples)
@@ -255,6 +256,28 @@ def configure(
             The Python file containing the updated configuration values.
             If not provided and the ``--config`` parameter is a command-line
             argument, the corresponding argument is used as the configuration
+    """
+```
+
+
+### `yapecs.compose`
+
+```python
+def compose(
+    module: ModuleType,
+    config_paths: List[Union[str, Path]]
+) -> ModuleType:
+    """Compose a configured module from a base module and list of configs
+
+    Arguments
+        module
+            The base module to configure
+        config_paths
+            A list of paths to yapecs config files
+
+    Returns
+        composed
+            A new module made from the base module and configurations
     """
 ```
 
