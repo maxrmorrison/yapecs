@@ -17,9 +17,9 @@ def test_compose():
     # Check that value is as expected
     assert weather.TODAYS_TEMP_FEATURE
 
-    # Modify configuration
+    # re-import with composed configuration
     weather_compose = yapecs.compose(
-        weather,
+        'weather',
         [Path(__file__).parent / 'config' / 'config.py'])
 
     # Check that value was updated
@@ -50,3 +50,33 @@ def test_configuration():
 
     # Check that value was updated
     assert not weather.TODAYS_TEMP_FEATURE
+
+def test_grid_search():
+    """Test yapecs grid_search"""
+    import weather
+
+    config_file = Path(__file__).parent / 'config' / 'grid_search.py'
+    progress_file = Path(__file__).parent / 'config' / 'grid_search.progress'
+    if progress_file.exists():
+        progress_file.unlink()
+
+    weather_first = yapecs.compose(
+        'weather', [config_file])
+    
+    assert weather_first.LEARNING_RATE == 1e-5
+    assert weather_first.BATCH_SIZE == 64
+    assert weather_first.AVERAGE_TEMP_FEATURE == True
+
+    weather_second = yapecs.compose(
+        'weather', [config_file])
+    
+    assert weather_second.LEARNING_RATE == 1e-5
+    assert weather_second.BATCH_SIZE == 64
+    assert weather_second.AVERAGE_TEMP_FEATURE == False
+
+    weather_third = yapecs.compose(
+        'weather', [config_file])
+    
+    assert weather_third.LEARNING_RATE == 1e-5
+    assert weather_third.BATCH_SIZE == 128
+    assert weather_third.AVERAGE_TEMP_FEATURE == True
