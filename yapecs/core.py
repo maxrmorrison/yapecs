@@ -7,6 +7,7 @@ from copy import copy
 from pathlib import Path
 from types import ModuleType
 from typing import List, Optional, Tuple, Union
+from filelock import FileLock
 
 
 ###############################################################################
@@ -99,7 +100,12 @@ def compose(
         composed
             A new module made from the base module and configurations
     """
-    # TODO create a lock to prevent potential issues when using multithreading
+    # Create a lock to prevent multithreading issues
+    # We store the lock directly in sys.modules since that's the
+    #  shared resource that we care about (kinda genius no?)
+    if 'yapecs.COMPOSE_LOCK' in sys.modules:
+        raise RuntimeError(f"Two different threads tried to compose {name} at the same time")
+    sys.modules['yapecs.COMPOSE_LOCK'] = None
 
     # Handle sys.argv changes by adding
     # `--config config_paths[0] config_paths[1]...`
@@ -137,6 +143,8 @@ def compose(
     # Revert sys.argv
     while len(sys.argv) > original_argv_len:
         del sys.argv[-1]
+
+    del sys.modules['yapecs.COMPOSE_LOCK']
 
     return module
 
@@ -263,23 +271,25 @@ def grid_search(progress_file: Union[str, os.PathLike], *args: Tuple) -> Tuple:
     """
     # Get current progress
     progress_file = Path(progress_file)
-    if not progress_file.exists():
-        progress = 0
-    else:
-        with open(progress_file) as f:
-            progress = int(f.read())
+    lock_file = FileLock(Path(str(progress_file) + '.lock'), timeout=10)
+    with lock_file:
+        if not progress_file.exists():
+            progress = 0
+        else:
+            with open(progress_file) as f:
+                progress = int(f.read())
 
-    # Raise if finished
-    combinations = list(itertools.product(*args))
-    if progress >= len(combinations):
-        raise IndexError('Finished grid search')
+        # Raise if finished
+        combinations = list(itertools.product(*args))
+        if progress >= len(combinations):
+            raise IndexError('Finished grid search')
 
-    # Write updated progress
-    with open(progress_file, 'w+') as file:
-        file.write(str(progress + 1))
+        # Write updated progress
+        with open(progress_file, 'w+') as file:
+            file.write(str(progress + 1))
 
-    # Get corresponding argument combination
-    return combinations[progress]
+        # Get corresponding argument combination
+        return combinations[progress]
 
 
 ###############################################################################
