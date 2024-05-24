@@ -16,7 +16,6 @@ alternative to using JSON or YAML files, or more complex solutions such as
 - Configuration files are written in Python. You do not need to learn new syntax, and your configurations can be as expressive as desired, using, e.g., classes, functions, or built-in types.
 - Configuration parameters are bound to the user's module. This reduces code bloat by eliminating the need to pass a configuration dictionary or many individual values through functions.
 - Integration is simple, requiring only four or five lines of code (including imports).
-- `yapecs` is concise; the documentation for `yapecs` (this README) is longer than the code.
 
 
 ## Table of contents
