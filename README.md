@@ -96,9 +96,9 @@ from .config import defaults
 # Modify configuration
 import yapecs
 yapecs.configure('weather', defaults)
-del defaults # optional line to allow locks in grid_search
 
 # Import configuration parameters
+del defaults
 from .config.defaults import *
 
 
@@ -129,9 +129,9 @@ We update the module root initialization as follows.
 ```python
 ...
 
-# Import configuration parameters
 from .config.defaults import *
 from .config.static import *  # Import dependent parameters last
+
 
 ###############################################################################
 # Module imports
@@ -161,19 +161,20 @@ assert weather.TODAYS_TEMP_FEATURE and not weather_compose.TODAYS_TEMP_FEATURE
 
 ### Hyperparameter search
 
-To perform a hyperparameter search, write a single config file containing values over which to perform a grid search.
-
-Here is an example config. Note that we check if weather as the `defaults` attribute as a lock on whether or not it is currently being configured. This prevents the progress file from being updated multiple times erroneously.
+To perform a hyperparameter grid search, write a config file containing the lists of values to search. Below is an example. Note that we check if weather as the `defaults` attribute as a lock on whether or not it is currently being configured. This prevents the progress file from being updated multiple times erroneously.
 
 ```python
 MODULE = 'weather'
 
 import yapecs
-import weather
 from pathlib import Path
 
+
+# Import module, but delay updating search params until after configuration
+import weather
 if hasattr(weather, 'defaults'):
 
+    # Lock file to track search progress
     progress_file = Path(__file__).parent / 'grid_search.progress'
 
     # Values that we want to search over
@@ -181,8 +182,7 @@ if hasattr(weather, 'defaults'):
     batch_size = [64, 128, 256]
     average_temp_feature = [True, False]
 
-    # yapecs.grid_search handles loading and saving the progress file as well
-    # as computing the current combination of config values
+    # Get grid search parameters for this run
     LEARNING_RATE, BATCH_SIZE, AVERAGE_TEMP_FEATURE = yapecs.grid_search(
         progress_file,
         learning_rate,
@@ -195,26 +195,14 @@ if hasattr(weather, 'defaults'):
 ###############################################################################
 
 
-# Number of steps between saving checkpoints
-CHECKPOINT_INTERVAL = 25_000  # steps
-
-# Dimensionality of input representation
-INPUT_CHANNELS = 80
-
-# Whether to mask future values
-IS_CAUSAL = True
-
-# Input representation
-REPRESENTATION = 'mel'
-
-# Number of training steps
-STEPS = 50_000
+# Whether to use today's temperature as a feature
+TODAYS_TEMP_FEATURE = False
 ```
 
 You can perform the search by running, e.g.,
 
 ```bash
-while python -m ppgs.train --config causal_transformer_search.py; do :; done
+while python -m weather --config causal_transformer_search.py; do :; done
 ```
 
 This runs training repeatedly, incrementing the progress index and choosing the appropriate config values each time until the search is complete. Running a hyperparameter search in parallel is not (yet) supported.
