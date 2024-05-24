@@ -7,6 +7,7 @@ from copy import copy
 from pathlib import Path
 from types import ModuleType
 from typing import List, Optional, Tuple, Union
+from filelock import FileLock
 
 
 ###############################################################################
@@ -84,14 +85,14 @@ def configure(
 
 
 def compose(
-    module: ModuleType,
+    name: str,
     config_paths: List[Union[str, Path]]
 ) -> ModuleType:
     """Compose a configured module from a base module and list of configs
 
     Arguments
-        module
-            The base module to configure
+        name
+            Name of the base module to configure
         config_paths
             A list of paths to yapecs config files
 
@@ -99,11 +100,16 @@ def compose(
         composed
             A new module made from the base module and configurations
     """
-    # TODO create a lock to prevent potential issues when using multithreading
+    # Create a lock to prevent multithreading issues
+    # We store the lock directly in sys.modules since that's the
+    #  shared resource that we care about (kinda genius no?)
+    if 'yapecs.COMPOSE_LOCK' in sys.modules:
+        raise RuntimeError(f"Two different threads tried to compose {name} at the same time")
+    sys.modules['yapecs.COMPOSE_LOCK'] = None
 
     # Handle sys.argv changes by adding
     # `--config config_paths[0] config_paths[1]...`
-    original_argv = copy(sys.argv)
+    original_argv_len = len(sys.argv)
     if '--config' in sys.argv:
         raise ValueError(
             'cannot replace --config, --config must not be set in sys.argv')
@@ -114,32 +120,31 @@ def compose(
 
     # Temporarily remove configured modules from sys.modules to ensure
     # that other modules are configured properly
-    original_modules = copy(sys.modules)
+    to_restore = {}
     config_module_names = []
     for config_path in config_paths:
         config_module = import_from_path('config', config_path)
         config_module_names.append(config_module.MODULE)
     to_delete = []
-    for module_name in sys.modules.keys():
+    for module_name in copy(sys.modules).keys():
         if module_name.split('.')[0] in config_module_names:
             to_delete.append(module_name)
     for module_name in to_delete:
+        to_restore[module_name] = sys.modules[module_name]
         del sys.modules[module_name]
 
     # Import the module
-    name = module.__name__
-    path = module.__path__
-    if isinstance(path, list):
-        path = path[0] #TODO investigate remifications
-    if not path.endswith('.py'):
-        path = path + '/__init__.py' #TODO make better
-    module = import_from_path(name, path)
+    module = importlib.import_module(name)
 
     # Revert sys.modules
-    sys.modules = original_modules
+    for module_name, module_object in to_restore.items():
+        sys.modules[module_name] = module_object
 
     # Revert sys.argv
-    sys.argv = original_argv
+    while len(sys.argv) > original_argv_len:
+        del sys.argv[-1]
+
+    del sys.modules['yapecs.COMPOSE_LOCK']
 
     return module
 
@@ -266,23 +271,25 @@ def grid_search(progress_file: Union[str, os.PathLike], *args: Tuple) -> Tuple:
     """
     # Get current progress
     progress_file = Path(progress_file)
-    if not progress_file.exists():
-        progress = 0
-    else:
-        with open(progress_file) as f:
-            progress = int(f.read())
+    lock_file = FileLock(Path(str(progress_file) + '.lock'), timeout=10)
+    with lock_file:
+        if not progress_file.exists():
+            progress = 0
+        else:
+            with open(progress_file) as f:
+                progress = int(f.read())
 
-    # Raise if finished
-    combinations = list(itertools.product(*args))
-    if progress >= len(combinations):
-        raise IndexError('Finished grid search')
+        # Raise if finished
+        combinations = list(itertools.product(*args))
+        if progress >= len(combinations):
+            raise IndexError('Finished grid search')
 
-    # Write updated progress
-    with open(progress_file, 'w+') as file:
-        file.write(str(progress + 1))
+        # Write updated progress
+        with open(progress_file, 'w+') as file:
+            file.write(str(progress + 1))
 
-    # Get corresponding argument combination
-    return combinations[progress]
+        # Get corresponding argument combination
+        return combinations[progress]
 
 
 ###############################################################################

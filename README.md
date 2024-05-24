@@ -96,6 +96,7 @@ from .config import defaults
 # Modify configuration
 import yapecs
 yapecs.configure('weather', defaults)
+del defaults # optional line to allow locks in grid_search
 
 # Import configuration parameters
 from .config.defaults import *
@@ -162,45 +163,31 @@ assert weather.TODAYS_TEMP_FEATURE and not weather_compose.TODAYS_TEMP_FEATURE
 
 To perform a hyperparameter search, write a single config file containing values over which to perform a grid search.
 
-Here is an example (from [this repo](https://github.com/interactiveaudiolab/ppgs)), which performs a grid search over configuration parameters `HIDDEN_CHANNELS`, `NUM_HIDDEN_LAYERS`, and `KERNEL_SIZE`:
+Here is an example config. Note that we check if weather as the `defaults` attribute as a lock on whether or not it is currently being configured. This prevents the progress file from being updated multiple times erroneously.
 
 ```python
-MODULE = 'ppgs'
+MODULE = 'weather'
 
+import yapecs
+import weather
 from pathlib import Path
 
-import ppgs
-import yapecs
+if hasattr(weather, 'defaults'):
 
-
-###############################################################################
-# Hyperparameter search
-###############################################################################
-
-
-# This code only runs once (during configuration setup)
-if hasattr(ppgs, 'defaults'):
-
-    progress_file = Path(__file__).parent / 'causal_transformer_search.progress'
+    progress_file = Path(__file__).parent / 'grid_search.progress'
 
     # Values that we want to search over
-    hidden_channels = [64, 128, 256, 512]
-    num_hidden_layers = [3, 4, 5]
-    kernel_size = [3, 5, 7]
+    learning_rate = [1e-5, 1e-4, 1e-3]
+    batch_size = [64, 128, 256]
+    average_temp_feature = [True, False]
 
     # yapecs.grid_search handles loading and saving the progress file as well
     # as computing the current combination of config values
-    HIDDEN_CHANNELS, NUM_HIDDEN_LAYERS, KERNEL_SIZE = yapecs.grid_search(
+    LEARNING_RATE, BATCH_SIZE, AVERAGE_TEMP_FEATURE = yapecs.grid_search(
         progress_file,
-        hidden_channels,
-        num_hidden_layers,
-        kernel_size)
-
-    # Name the config using the specific values for this run.
-    CONFIG = (
-        f'causal_transformer_search/'
-        f'{HIDDEN_CHANNELS}-{NUM_HIDDEN_LAYERS}-{KERNEL_SIZE}'
-    ).replace('.', '_')
+        learning_rate,
+        batch_size,
+        average_temp_feature)
 
 
 ###############################################################################
