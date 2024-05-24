@@ -130,7 +130,7 @@ We update the module root initialization as follows.
 
 # Import configuration parameters
 from .config.defaults import *
-from .config.static import *  # Import dependent parameters after configuration
+from .config.static import *  # Import dependent parameters last
 
 ###############################################################################
 # Module imports
@@ -168,8 +168,6 @@ Here is an example (from [this repo](https://github.com/interactiveaudiolab/ppgs
 MODULE = 'ppgs'
 
 from pathlib import Path
-from itertools import product
-import torch
 
 import ppgs
 import yapecs
@@ -331,7 +329,7 @@ class ArgumentParser(argparse.ArgumentParser):
 
 The following are code repositories that utilize `yapecs` for configuration. If you would like to see your repo included, please open a pull request.
 
-- [`emphases`](https://github.com/interactiveaudiolab/emphases)
-- [`penn`](https://github.com/interactiveaudiolab/penn)
-- [`ppgs`](https://github.com/interactiveaudiolab/ppgs)
-- [`pyfoal`](https://github.com/maxrmorrison/pyfoal)
+- [`emphases`](https://github.com/interactiveaudiolab/emphases) - Crowdsourced and automatic speech prominence estimation
+- [`penn`](https://github.com/interactiveaudiolab/penn) - Pitch-estimating neural networks
+- [`ppgs`](https://github.com/interactiveaudiolab/ppgs) - High-fidelity neural phonetic posteriorgrams
+- [`pyfoal`](https://github.com/maxrmorrison/pyfoal) - Python forced alignment
