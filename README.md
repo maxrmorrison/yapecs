@@ -208,7 +208,7 @@ while python -m weather --config causal_transformer_search.py; do :; done
 
 This runs training repeatedly, incrementing the progress index and choosing the appropriate config values each time until the search is complete. Running a hyperparameter search in parallel is not (yet) supported.
 
-## Computed properties
+### Computed properties
 
 By default, config properties are static and cannot depend on config changes made later, nor can they depend on objects created later in the initialization of the module such as a Model class.
 
