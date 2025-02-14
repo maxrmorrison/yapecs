@@ -94,7 +94,16 @@ def configure(
                         config_module,
                         parameter,
                         value)
-
+            elif parameter in properties:
+                value = getattr(updated_module, parameter)
+                if isinstance(value, ComputedProperty):
+                    properties[parameter] = value
+                else:
+                    del properties[parameter]
+                    setattr(
+                        config_module,
+                        parameter,
+                        value)
 
 ###############################################################################
 # Compose a configured module from an existing module
