@@ -80,3 +80,18 @@ def test_grid_search():
     assert weather_third.LEARNING_RATE == 1e-5
     assert weather_third.BATCH_SIZE == 128
     assert weather_third.AVERAGE_TEMP_FEATURE == True
+
+def test_property():
+    """Test yapecs computed properties"""
+
+    # use compose because it's the easiest way to mimic actual usage
+    _weather = yapecs.compose('weather', [Path(__file__).parent / 'config' / 'property.py'])
+
+    assert not _weather.TODAYS_TEMP_FEATURE
+    assert not _weather.AVERAGE_TEMP_FEATURE
+
+    # unrealistic use case, but demonstrates dynamic nature of properties
+    _weather.TODAYS_TEMP_FEATURE = True
+
+    assert _weather.TODAYS_TEMP_FEATURE
+    assert _weather.AVERAGE_TEMP_FEATURE

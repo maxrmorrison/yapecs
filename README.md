@@ -24,11 +24,13 @@ alternative to using JSON or YAML files, or more complex solutions such as
   * [Configuration](#configuration)
   * [Composition](#composition)
   * [Hyperparameter search](#hyperparameter-search)
+  * [Computed properties](#computed-properties)
 - [Application programming interface (API)](#application-programming-interface-api)
   * [`yapecs.configure`](#yapecsconfigure)
   * [`yapecs.compose`](#yapecscompose)
   * [`yapecs.grid_search`](#yapecsgrid_search)
   * [`yapecs.ArgumentParser`](#yapecsargumentparser)
+  * [`yapecs.ComputedProperty`](#yapecscomputedproperty)
 - [Community examples](#community-examples)
 
 
@@ -151,7 +153,7 @@ import yapecs
 import weather
 
 # Compose base module with configuration file
-weather_compose = yapecs.compose(weather, ['config.py'])
+weather_compose = yapecs.compose('weather', ['config.py'])
 
 # Test that the modules are now different
 assert weather.TODAYS_TEMP_FEATURE and not weather_compose.TODAYS_TEMP_FEATURE
@@ -206,6 +208,29 @@ while python -m weather --config causal_transformer_search.py; do :; done
 
 This runs training repeatedly, incrementing the progress index and choosing the appropriate config values each time until the search is complete. Running a hyperparameter search in parallel is not (yet) supported.
 
+## Computed properties
+
+By default, config properties are static and cannot depend on config changes made later, nor can they depend on objects created later in the initialization of the module such as a Model class.
+
+You can use the `@ComputedProperty` decorator to mark a function as a computed property. `yapecs` will then automatically execute this function and pass the return value whenever the property is accessed, similar to `@property` decorated class functions. Here is an example config file:
+
+```python
+MODULE = 'weather'
+import weather
+import yapecs
+
+# Whether to use today's temperature as a feature
+TODAYS_TEMP_FEATURE = False
+
+# Here we use a computed property.
+# Computed properties can depend on other properties
+#  of the module, or anything really.
+# `yapecs` will automatically run this function when you
+#  access `weather.AVERAGE_TEMP_FEATURE`
+@yapecs.ComputedProperty
+def AVERAGE_TEMP_FEATURE():
+    return weather.TODAYS_TEMP_FEATURE
+```
 
 ## Application programming interface (API)
 
@@ -296,6 +321,17 @@ class ArgumentParser(argparse.ArgumentParser):
         Returns
             Namespace containing program arguments
         """
+```
+
+### `yapecs.ComputedProperty`
+
+This class acts as a decorator which, when applied to a function, creates a new `ComputedProperty` instance wrapping the function. `yapecs` checks for `ComputedProperty` instances and separates them out from normal attributes so that they can be executed when accessed so that you get the return value instead of the function.
+
+```python
+class ComputedProperty():
+    """A decorator for functions representing computed properties"""
+    def __init__(self, getter: callable):
+        """Mark a function as a computed property"""
 ```
 
 
