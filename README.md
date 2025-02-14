@@ -144,7 +144,7 @@ from .config.static import *  # Import dependent parameters last
 The second change we make is to add `--config` as a command-line option. We created a lightweight replacement for `argparse.ArgumentParser`, called `yapecs.ArgumentParser`, which does this.
 
 
-## Composing configured modules
+### Composing configured modules
 
 When working with multiple configurations of the same module, you can load the module multiple times with different configs by using `yapecs.compose`.
 
