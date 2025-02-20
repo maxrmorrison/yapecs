@@ -227,10 +227,24 @@ TODAYS_TEMP_FEATURE = False
 #  of the module, or anything really.
 # `yapecs` will automatically run this function when you
 #  access `weather.AVERAGE_TEMP_FEATURE`
-@yapecs.ComputedProperty
+@yapecs.ComputedProperty(compute_once=False)
 def AVERAGE_TEMP_FEATURE():
     return weather.TODAYS_TEMP_FEATURE
 ```
+
+Now `weather.AVERAGE_TEMP_FEATURE` will always have the same value as `weather.TODAYS_TEMP_FEATURE`, even if the latter is changed.
+
+Note that since `compute_once` is `False` in this example, this property will be recomputed every time it is accessed via `weather.AVERAGE_TEMP_FEATURE`. For convenience, we include an option to cache the function
+output directly in the ComputedProperty instance by setting `compute_once=True` as below
+
+```python
+# This property will be cached after the first access to `weather.AVERAGE_TEMP_FEATURE`
+@yapecs.ComputedProperty(compute_once=True)
+def AVERAGE_TEMP_FEATURE():
+    return weather.TODAYS_TEMP_FEATURE
+```
+
+Now `weather.AVERAGE_TEMP_FEATURE` will have the same value that `weather.TODAYS_TEMP_FEATURE` had whenever `weather.AVERAGE_TEMP_FEATURE` was first accessed. If `weather.TODAYS_TEMP_FEATURE` changes, `weather.AVERAGE_TEMP_FEATURE` will not change in this example.
 
 ## Application programming interface (API)
 
@@ -325,15 +339,21 @@ class ArgumentParser(argparse.ArgumentParser):
 
 ### `yapecs.ComputedProperty`
 
-This class acts as a decorator which, when applied to a function, creates a new `ComputedProperty` instance wrapping the function. `yapecs` checks for `ComputedProperty` instances and separates them out from normal attributes so that they can be executed when accessed so that you get the return value instead of the function.
+This class acts as a decorator which, when applied to a function, creates a new `ComputedProperty` instance wrapping the function. `yapecs` checks for `ComputedProperty` instances and separates them out from normal attributes so that they can be executed when accessed so that you get the return value instead of the function. 
+
+The `compute_once` argument allows you to decide whether or not the property should be cached the first time it is computed, or recomputed every time. It is required (has no default value) to ensure the user is never surprised by caching behavior.
 
 ```python
 class ComputedProperty():
     """A decorator for functions representing computed properties"""
-    def __init__(self, getter: callable):
-        """Mark a function as a computed property"""
-```
+    def __init__(self, compute_once: bool):
+        """Mark a function as a computed property
 
+        Arguments
+            compute_once
+                should the property be computed only once and then cached (True), or recomputed every time (False)
+        """
+```
 
 ## Community examples
 

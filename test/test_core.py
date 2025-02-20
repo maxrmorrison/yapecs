@@ -95,3 +95,18 @@ def test_property():
 
     assert _weather.TODAYS_TEMP_FEATURE
     assert _weather.AVERAGE_TEMP_FEATURE
+
+def test_cached_property():
+    """Test caching (compute_once) of yapecs computed properties"""
+
+    # use compose because it's the easiest way to mimic actual usage
+    _weather = yapecs.compose('weather', [Path(__file__).parent / 'config' / 'cached_property.py'])
+
+    assert not _weather.TODAYS_TEMP_FEATURE
+    assert not _weather.AVERAGE_TEMP_FEATURE
+
+    # unrealistic use case, but demonstrates dynamic nature of properties
+    _weather.TODAYS_TEMP_FEATURE = True
+
+    assert _weather.TODAYS_TEMP_FEATURE
+    assert not _weather.AVERAGE_TEMP_FEATURE

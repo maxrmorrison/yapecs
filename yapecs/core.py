@@ -325,12 +325,30 @@ def grid_search(progress_file: Union[str, os.PathLike], *args: Tuple) -> Tuple:
 class ComputedProperty():
     """A decorator for functions representing computed properties"""
 
-    def __init__(self, getter: callable):
-        """Mark a function as a computed property"""
-        self.getter = getter
+    def __init__(self, compute_once: bool):
+        """Mark a function as a computed property
 
-    def __call__(self):
-        return self.getter()
+        Arguments
+            compute_once
+                should the property be computed only once and then cached (True), or recomputed every time (False)
+        """
+        self.compute_once = compute_once
+        self.getter = None
+        self._cache = None
+
+    def __call__(self, getter=None):
+        if self._cache is not None:
+            return self._cache
+        if self.getter is None:
+            self.getter = getter
+            return self
+        else:
+            assert getter is None
+            value = self.getter()
+            if self.compute_once:
+                self._cache = value
+            return value
+
 
 def import_from_path(name: str, path: Union[Path, str]) -> ModuleType:
     """Import module from a filesystem path
