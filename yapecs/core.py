@@ -33,6 +33,18 @@ def configure(
             If not provided and the ``--config`` parameter is a command-line
             argument, the corresponding argument is used as the configuration
     """
+
+    # wrap __getattr__ on module so that
+    #  ComputedProperty instances can be called
+    module_object = sys.modules[module_name]
+    properties = {} # keep track of ComputedProperty instances
+    def getattr_wrapped(name):
+        if name in properties:
+            return properties[name]()
+        else:
+            raise AttributeError(f"module {module_object.__name__} has no attribute {name}")
+    module_object.__getattr__ = getattr_wrapped
+
     # Get config file
     if config is None:
 
@@ -70,15 +82,28 @@ def configure(
         # Only update when the module name matches
         if updated_module.MODULE != module_name:
             continue
-
         # Merge config module and default config module
         for parameter in dir(updated_module):
             if hasattr(config_module, parameter):
-                setattr(
-                    config_module,
-                    parameter,
-                    getattr(updated_module, parameter))
-
+                value = getattr(updated_module, parameter)
+                if isinstance(value, ComputedProperty):
+                    properties[parameter] = value
+                    delattr(config_module, parameter)
+                else:
+                    setattr(
+                        config_module,
+                        parameter,
+                        value)
+            elif parameter in properties:
+                value = getattr(updated_module, parameter)
+                if isinstance(value, ComputedProperty):
+                    properties[parameter] = value
+                else:
+                    del properties[parameter]
+                    setattr(
+                        config_module,
+                        parameter,
+                        value)
 
 ###############################################################################
 # Compose a configured module from an existing module
@@ -296,6 +321,33 @@ def grid_search(progress_file: Union[str, os.PathLike], *args: Tuple) -> Tuple:
 ###############################################################################
 # Utilities
 ###############################################################################
+
+class ComputedProperty():
+    """A decorator for functions representing computed properties"""
+
+    def __init__(self, compute_once: bool):
+        """Mark a function as a computed property
+
+        Arguments
+            compute_once
+                should the property be computed only once and then cached (True), or recomputed every time (False)
+        """
+        self.compute_once = compute_once
+        self.getter = None
+        self._cache = None
+
+    def __call__(self, getter=None):
+        if self._cache is not None:
+            return self._cache
+        if self.getter is None:
+            self.getter = getter
+            return self
+        else:
+            assert getter is None
+            value = self.getter()
+            if self.compute_once:
+                self._cache = value
+            return value
 
 
 def import_from_path(name: str, path: Union[Path, str]) -> ModuleType:
