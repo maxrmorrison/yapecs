@@ -45,6 +45,13 @@ def configure(
             raise AttributeError(f"module {module_object.__name__} has no attribute {name}")
     module_object.__getattr__ = getattr_wrapped
 
+    # Handle Computed Properties in default config
+    for parameter in dir(config_module):
+        value = getattr(config_module, parameter)
+        if isinstance(value, ComputedProperty):
+            properties[parameter] = value
+            delattr(config_module, parameter)
+
     # Get config file
     if config is None:
 
