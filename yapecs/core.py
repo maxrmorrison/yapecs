@@ -142,14 +142,19 @@ def compose(
 
     # Handle sys.argv changes by adding
     # `--config config_paths[0] config_paths[1]...`
-    original_argv_len = len(sys.argv)
-    if '--config' in sys.argv:
-        raise ValueError(
-            'cannot replace --config, --config must not be set in sys.argv')
-    sys.argv.append('--config')
+    # This prepends the configs before any that were added by the command line
+    argv_indices_to_delete = []
+    if '--config' not in sys.argv:
+        sys.argv.append('--config')
+        config_arg_index = sys.argv.index('--config')
+        argv_indices_to_delete.append(config_arg_index)
+    else:
+        config_arg_index = sys.argv.index('--config')
     assert len(config_paths) >= 1
-    for config_path in config_paths:
-        sys.argv.append(config_path)
+    for i, config_path in enumerate(config_paths):
+        idx = config_arg_index + i + 1
+        sys.argv.insert(idx, str(config_path))
+        argv_indices_to_delete.append(idx)
 
     # Temporarily remove configured modules from sys.modules to ensure
     # that other modules are configured properly
@@ -174,8 +179,8 @@ def compose(
         sys.modules[module_name] = module_object
 
     # Revert sys.argv
-    while len(sys.argv) > original_argv_len:
-        del sys.argv[-1]
+    for idx in reversed(argv_indices_to_delete):
+        del sys.argv[idx]
 
     del sys.modules['yapecs.COMPOSE_LOCK']
 

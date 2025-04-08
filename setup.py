@@ -8,7 +8,7 @@ with open('README.md', encoding='utf8') as file:
 setup(
     name='yapecs',
     description='Yet Another Python Experiment Configuration System (YAPECS)',
-    version='0.2.0',
+    version='0.3.0',
     author='Max Morrison',
     author_email='maxrmorrison@gmail.com',
     url='https://github.com/maxrmorrison/yapecs',
