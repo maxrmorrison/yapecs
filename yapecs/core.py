@@ -136,9 +136,9 @@ def compose(
     # Create a lock to prevent multithreading issues
     # We store the lock directly in sys.modules since that's the
     #  shared resource that we care about (kinda genius no?)
-    if 'yapecs.COMPOSE_LOCK' in sys.modules:
+    if f'yapecs.COMPOSE_LOCK_{name}' in sys.modules:
         raise RuntimeError(f"Two different threads tried to compose {name} at the same time")
-    sys.modules['yapecs.COMPOSE_LOCK'] = None
+    sys.modules[f'yapecs.COMPOSE_LOCK_{name}'] = None
 
     # Handle sys.argv changes by adding
     # `--config config_paths[0] config_paths[1]...`
@@ -182,7 +182,7 @@ def compose(
     for idx in reversed(argv_indices_to_delete):
         del sys.argv[idx]
 
-    del sys.modules['yapecs.COMPOSE_LOCK']
+    del sys.modules[f'yapecs.COMPOSE_LOCK_{name}']
 
     return module
 
