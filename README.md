@@ -15,8 +15,9 @@ alternative to using JSON or YAML files, or more complex solutions such as
 
 - Configuration files are written in Python. You do not need to learn new syntax, and your configurations can be as expressive as desired, using, e.g., classes, functions, or built-in types.
 - Configuration parameters are bound to the user's module. This reduces code bloat by eliminating the need to pass a configuration dictionary or many individual values through functions.
-- Integration is simple, requiring only four or five lines of code (including imports).
+- Integration is simple, requiring only a few lines of code (including imports).
 
+`yapecs` is inspired by how compile-time configuration is performed within compiled languages (e.g., C++ macros). The key insight behind `yapecs` is that we achieve a similar behavior as compile-time configuration by performing configuration as the first step of module initialization (i.e., in `__init__.py`).
 
 ## Table of contents
 
@@ -362,4 +363,5 @@ The following are code repositories that utilize `yapecs` for configuration. If 
 - [`emphases`](https://github.com/interactiveaudiolab/emphases) - Crowdsourced and automatic speech prominence estimation
 - [`penn`](https://github.com/interactiveaudiolab/penn) - Pitch-estimating neural networks
 - [`ppgs`](https://github.com/interactiveaudiolab/ppgs) - High-fidelity neural phonetic posteriorgrams
+- [`promonet`](https://github.com/maxrmorrison/promonet) - Prosody and pronunciation modification network
 - [`pyfoal`](https://github.com/maxrmorrison/pyfoal) - Python forced alignment
