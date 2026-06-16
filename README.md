@@ -26,6 +26,7 @@ alternative to using JSON or YAML files, or more complex solutions such as
   * [Composition](#composition)
   * [Hyperparameter search](#hyperparameter-search)
   * [Computed properties](#computed-properties)
+  * [Including other config files](#including-other-config-files)
 - [Application programming interface (API)](#application-programming-interface-api)
   * [`yapecs.configure`](#yapecsconfigure)
   * [`yapecs.compose`](#yapecscompose)
@@ -247,6 +248,34 @@ def AVERAGE_TEMP_FEATURE():
 
 Now `weather.AVERAGE_TEMP_FEATURE` will have the same value that `weather.TODAYS_TEMP_FEATURE` had whenever `weather.AVERAGE_TEMP_FEATURE` was first accessed. If `weather.TODAYS_TEMP_FEATURE` changes, `weather.AVERAGE_TEMP_FEATURE` will not change in this example.
 
+### Including other config files
+
+Config files can include other config files using `yapecs.include`. This is useful for sharing common overrides across multiple configs without duplication.
+
+```python
+MODULE = 'weather'
+import weather
+import yapecs
+from pathlib import Path
+
+# Whether to use today's temperature as a feature
+TODAYS_TEMP_FEATURE = False
+
+yapecs.include(Path(__file__).parent / 'included.py')
+```
+
+The included file does not need a `MODULE` assignment — it only needs to define the values you want to set.
+
+```python
+# Whether to use today's temperature as a feature
+TODAYS_TEMP_FEATURE = True
+
+__NOT_VISIBLE = 42
+```
+
+Variables prefixed with `__` in the included file are not imported into the including config.
+
+
 ## Application programming interface (API)
 
 ### `yapecs.configure`
@@ -290,6 +319,18 @@ def compose(
     Returns
         composed
             A new module made from the base module and configurations
+    """
+```
+
+### `yapecs.include`
+
+```python
+def include(path: os.PathLike):
+    """Include all values that do not start with '__' from another config file inline.
+
+    Arguments
+        path
+            path to the other config file
     """
 ```
 

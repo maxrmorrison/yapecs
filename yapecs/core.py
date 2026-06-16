@@ -186,6 +186,28 @@ def compose(
 
     return module
 
+###############################################################################
+# Including another config inline
+###############################################################################
+
+
+def include(path: os.PathLike):
+    """Include all values that do not start with '__' from another config file inline.
+
+    Arguments
+        path
+            path to the other config file
+    """
+    
+    path = Path(path)
+
+    loaded_config = import_from_path(path.stem, path)
+
+    caller_frame = sys._getframe(1)
+    caller_globals = caller_frame.f_globals
+
+    caller_globals.update({k:v for k,v in vars(loaded_config).items() if not k.startswith('__')})
+
 
 ###############################################################################
 # Argument parsing

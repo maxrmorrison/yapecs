@@ -110,3 +110,11 @@ def test_cached_property():
 
     assert _weather.TODAYS_TEMP_FEATURE
     assert not _weather.AVERAGE_TEMP_FEATURE
+
+def test_include():
+    """Test including another config file in a config file"""
+
+    _weather = yapecs.compose('weather', [Path(__file__).parent / 'config' / 'includer.py'])
+
+    assert _weather.TODAYS_TEMP_FEATURE
+    assert not hasattr(_weather, '__NOT_VISIBLE')

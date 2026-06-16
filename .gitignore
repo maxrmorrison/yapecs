@@ -6,3 +6,6 @@ docs/_autosummary
 docs/_build
 *.progress
 *.lock
+.venv/
+.vscode/
+.pytest_cache
